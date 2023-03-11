@@ -1,0 +1,4 @@
+TODO LIST:
+- Kje bo baza?
+- Kje bo frontier?
+- razredi?
