@@ -47,17 +47,17 @@ def increase_db_values(counter_id):
     cur.close()
     conn.close()
     
-def increase_db_values_locking(counter_id):
+def increase_db_values_locking():
     conn = psycopg2.connect(host="localhost", user="user", password="SecretPassword")
     conn.autocommit = True
 
     with lock:
         cur = conn.cursor()
-        cur.execute("SELECT value FROM showcase.counters WHERE counter_id = %s", \
-                    (counter_id,))
-        value = cur.fetchone()[0]
-        cur.execute("UPDATE showcase.counters SET value = %s WHERE counter_id = %s", \
-                    (value+1, counter_id))
+        cur.execute("select * from crawldb.page_type")
+        value = cur.fetchall()
+        print(value)
+        # cur.execute("UPDATE showcase.counters SET value = %s WHERE counter_id = %s", \
+        #             (value+1, counter_id))
         cur.close()
     conn.close()
 
@@ -102,10 +102,10 @@ def fl_inc_vals(id):
     increase_db_values(id)
     return jsonify({"success": True})
 
-@app.route('/db/increase_locking/<int:id>', methods=['POST'])
+@app.route('/db/increase_locking', methods=['GET'])
 #@basic_auth.login_required
-def fl_inc_vals_lock(id):
-    increase_db_values_locking(id)
+def fl_inc_vals_lock():
+    increase_db_values_locking()
     return jsonify({"success": True})
 
 
