@@ -13,19 +13,32 @@ class Frontier():
         self.conn.autocommit = True
         self.lock = threading.Lock()
 
-    def dodaj_v_frontier(self, link, cur=None):
+    def dodaj_v_frontier(self, link, id_domena, cur=None):
+        if link == "":
+            return
         if cur is None:
             cur = self.conn.cursor()
-            cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
-            cur.close()
+            #prvo dodamo v .page stran - možnost napake zaradi ponavljanja
+            try:
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id_domena}, 'FRONTIER', '{link}')")
+                cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
+            except: #upam da je samo napaka za duplikat
+                pass
         else:
-            cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
+            #prvo dodamo v .page stran - možnost napake zaradi ponavljanja
+            try:
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id_domena}, 'FRONTIER', '{link}')")
+                cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
+            except: #upam da je samo napaka za duplikat
+                pass
+
+        cur.close()
         return
     
-    def dodaj_vec_linkov(self, linki):
+    def dodaj_vec_linkov(self, linki, id_domena):
         cur = self.conn.cursor()
         for link in linki:
-            self.dodaj_v_frontier(link.get_attribute("href"), cur)
+            self.dodaj_v_frontier(link.get_attribute("href"), id_domena, cur)
         cur.close()
         return
     
@@ -35,6 +48,7 @@ class Frontier():
             cur.execute(f"select id, link from crawldb.frontier where status = 0 ORDER BY id LIMIT 1")
             id, rez = cur.fetchone()
             cur.execute(f"UPDATE crawldb.frontier SET status = 1 WHERE id = {id};")
+            #cur.execute(f"INSERT INTO crawldb.page")
             cur.close()
             return id, rez
     

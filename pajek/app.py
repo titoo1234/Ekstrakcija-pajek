@@ -8,11 +8,13 @@ from selenium.webdriver.chrome.options import Options
 from frontier import Frontier
 #import funkcije
 from vmesnik import Vmesnik
+from baza import Baza
 
 # pot = pathlib.Path().absolute()
 # WEB_DRIVER_LOCATION = str(pot) + "\..\chromedriver.exe"
 frontier = Frontier()
 vmesnik = Vmesnik()
+baza = Baza()
 # lastnosti = Options()
 # lastnosti.add_argument("--headless")
 # # ZANKA
@@ -23,10 +25,16 @@ vmesnik = Vmesnik()
 
 id, link = frontier.vrni_naslednjega()
 #VMESNIK. najdi  povezavoi
+#preden odprem stran, sparsam domeno
+id_domena, domena = baza.poglej_domeno(link)
+if id_domena == 0: #take domene še nimamo
+    html_robot, sitemap = vmesnik.robot(link, domena)
+    baza.dodaj_domeno(domena, html_robot, sitemap)
 
-vmesnik.odpri_stran(link)
+
+html = vmesnik.odpri_stran(link) #VRNE HTML
 linki = vmesnik.poisci_povezave()
-#slike = vmesnik.poisci_slike()
+slike = vmesnik.poisci_slike()
 # PODATKI O STRANI HEAD...
 
 #SIMETRIČNO ZA SLIKE
@@ -35,8 +43,10 @@ linki = vmesnik.poisci_povezave()
 
 #NAFILI VSE V BAZO
 
-
-frontier.dodaj_vec_linkov(linki)
+#PAZI VRSTNI RED
+# LAHKO MAMO SAMO ENO METODO V BAZA (KI SPREJME VELIKO ARGUMENTOV) IN POTEM V PRAVEM VRSTEM REDU KLICE SVOJE METODE (FILA BAZOs)
+#baza.dodaj_vse_v_bazo(link, html, slike) #id nerabis ker tisto je id od frontierja
+frontier.dodaj_vec_linkov(linki, id_domena)
 frontier.obdelan_link(id)
 
 
