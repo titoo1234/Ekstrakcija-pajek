@@ -19,11 +19,11 @@ class Frontier():
         if cur is None:
             cur = self.conn.cursor()
             #prvo dodamo v .page stran - možnost napake zaradi ponavljanja
-            try:
-                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id_domena}, 'FRONTIER', '{link}')")
-                cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
-            except: #upam da je samo napaka za duplikat
-                pass
+            # try:
+            cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id_domena}, 'FRONTIER', '{link}')")
+            cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
+            # except: #upam da je samo napaka za duplikat
+            #     pass
         else:
             #prvo dodamo v .page stran - možnost napake zaradi ponavljanja
             try:

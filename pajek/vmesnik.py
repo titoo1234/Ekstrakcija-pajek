@@ -33,17 +33,27 @@ class Vmesnik():
 
     def robot(self, link, domena):
         #self.vmesnik.get(link + "/robots.txt")
+        self.vmesnik.get(link)
         dolzina_domene = len(domena)
-        for i in range(len(link)):
+        for i in range(len(link)):#komentar??!!??
             if link[i:(i+dolzina_domene)] == domena:
                 j = i + dolzina_domene
-        robot_link = link[:j] + "/robots.txt"
+        robot_link = link+'/robots.txt'
+        print(robot_link)
+        # link[:j] + "/robots.txt"
         self.vmesnik.get(robot_link)
         html_robot = self.vmesnik.page_source
+        
+        #izberi tistega kjer je sitemap
+
         if "Not Found" in html_robot:
             return "", ""
         #iz html robot je treba vn pobrat še sitemap
-        sitemap = html_robot.split("Sitemap:")[1].split("\n")[0].strip()
+        try:
+            sitemap = html_robot.split("Sitemap:")[1].split("\n")[0].strip()
+        except :
+            sitemap = 'ninaslo'
+        print("Sitemap:" + sitemap)
         return html_robot, sitemap # UPAM DA JE PRAVI FORMAT
 
     def poisci_nedovoljene(self):

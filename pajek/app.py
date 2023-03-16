@@ -15,6 +15,16 @@ from baza import Baza
 frontier = Frontier()
 vmesnik = Vmesnik()
 baza = Baza()
+
+
+# ZA IZBRIS PODATKOV IZ BAZE IN DODAJANJE SEED-OV    
+# ======================================================================
+baza.zbrisi_vse_iz_baze(frontier,vmesnik)
+# ======================================================================
+
+
+
+
 # lastnosti = Options()
 # lastnosti.add_argument("--headless")
 # # ZANKA

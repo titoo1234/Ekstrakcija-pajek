@@ -105,3 +105,9 @@ INSERT INTO crawldb.page_type VALUES
 	('DUPLICATE'),
 	('FRONTIER');
 
+INSERT INTO crawldb.frontier (link, status) VALUES 
+	('http://gov.si/', 0),
+	('http://evem.gov.si/', 0),
+	('http://e-uprava.gov.si/', 0),
+	('http://e-prostor.gov.si/', 0);
+
