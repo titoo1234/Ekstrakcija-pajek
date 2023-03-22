@@ -13,5 +13,8 @@ class Robots:
         return nedovoljene_strani
 
     # TODO - ustvari metode za ostale omejitve glede robots.txt datotek
+    # - disallow
+    # - allow
     # - user-agent
-    # - 
+    # - crawl-delay
+    # - sitmap
