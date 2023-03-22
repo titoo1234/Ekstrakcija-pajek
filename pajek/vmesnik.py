@@ -5,6 +5,8 @@ import pathlib
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class Vmesnik():
@@ -21,15 +23,33 @@ class Vmesnik():
         #TREBA JIH BO OBDELAT
         return povezave
     
+    def poisci_linke(self, url):
+        self.vmesnik.get(url)
+        povezave = self.vmesnik.find_elements(By.XPATH, "//a[@href]")
+        #TREBA JIH BO OBDELAT
+        return povezave
+    
     def poisci_slike(self):
         #self.vmesnik.get(povezava)
         slike = self.vmesnik.find_elements(By.TAG_NAME, "img")
         #TREBA JIH BO OBDELAT
         return slike
     
+    def pojdi_na_stran(self, povezava):
+        return self.vmesnik.get(povezava) 
+    
     def odpri_stran(self, povezava): #VRNE HTML
         self.vmesnik.get(povezava)
         return self.vmesnik.page_source
+    
+    def vrni_vsebino(self, url): #VRNE HTML
+        self.vmesnik.get(url)
+        try:
+            pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            return self.vmesnik.find_element(By.TAG_NAME, "body").text
+        except TimeoutException:
+            "Predolgo čakanje na stran"
+        
 
     def robot(self, link, domena):
         #self.vmesnik.get(link + "/robots.txt")

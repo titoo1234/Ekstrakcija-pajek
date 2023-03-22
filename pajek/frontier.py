@@ -29,8 +29,8 @@ class Frontier():
             try:
                 cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id_domena}, 'FRONTIER', '{link}')")
                 cur.execute(f"Insert into crawldb.frontier (link, status) values ('{link}', 0)")
-            except: #upam da je samo napaka za duplikat
-                pass
+            except Exception as e: #upam da je samo napaka za duplikat
+                print(e)
 
         cur.close()
         return
