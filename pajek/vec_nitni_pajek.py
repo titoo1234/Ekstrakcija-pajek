@@ -17,6 +17,7 @@ class VecNitniPajek:
         self.domena = domena
         self.pool = ThreadPoolExecutor(max_workers=self.st_pajkov)
         self.obiskane_strani = set([])
+        self.nedovoljene_strani = set([]) # tukaj se hranijo strani ki zaradi robots.txt niso dovoljene
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
@@ -79,14 +80,16 @@ class VecNitniPajek:
             # TODO - POTREBNO JE PREGLEDATI ROBOTS DATOTEKO IN USTREZNO REAGIRATI!!!
             #        ČE NI ROBOTS.TXT DATOTEKE PA ČASOVNO OMEJITI ŠTEVILO DOSTOPOV 
             if self.zadosca_domeni(link) and self.robots.zadosca_robots_datoteki(link):
-                # Pogledamo ali je najden url že slučanjo med pregledanimi stranmi
-                if link not in self.obiskane_strani:
+                # Pogledamo ali je najden url že slučanjo med pregledanimi stranmi ali med nedovoljenimi stranmi
+                if link not in self.obiskane_strani and link not in self.nedovoljene_strani:
                     self.frontier.put(link)
 
     def konec_obdelave_strani(self, stran):
         rezultat_strani = stran.result()
         # TODO - ČE STATUS_CODE != 200 JE POTREBNO VSEENO ZABELEŽITI V BAZO
         if rezultat_strani and rezultat_strani.status_code == 200:
+            # najprej pridobimo nedovoljene strani iz robots.txt
+            self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url))
             self.pridobi_linke(rezultat_strani.url)
             self.pridobi_vsebino(rezultat_strani.url)
             # TODO - POTREBNO JE TUDI PREVERITI LINKE SLIK IN JIH USTREZNO DODATI V BAZO
@@ -97,6 +100,7 @@ class VecNitniPajek:
         """
         vsebina = self.vmesnik.vrni_vsebino(url)
         # TODO - TU BI DODALI VSE PODATKE O STRANI V BAZO IN USTREZNO SPREMENILI PAGE_TYPE
+        #      - TU BI LAHKO PREVERILI TUDI DUPLIKATE
         #self.baza.dodaj_vsebino(vsebina)
         print(vsebina)
         print("\nDodano v bazo\n")
