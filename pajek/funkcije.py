@@ -47,3 +47,11 @@ poisci_povezave(vmesnik, SEEDs[0])
 # print(values)
 # cur.close()
 # conn.close()
+
+def dovoljena_domena(link):
+    """
+    Funkcija vrne True, če imamo opravka z domen *.gov.si
+    """
+    if link[-7:] == ".gov.si": 
+        return True 
+    return False 
