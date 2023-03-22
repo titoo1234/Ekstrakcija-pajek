@@ -50,8 +50,14 @@ class VecNitniPajek:
 
     def obdelaj_stran(self, url):
         """
-        Metoda odpre podano stran in iz nje pobere vsebino
+        Metoda odpre podano stran
         """
+        # TODO POGLEDAMO V ROBOTSE DOMENE, KI SO ŽE ZAPISANI V BAZI
+        # pogledamo dovoljeni čas
+        # POGLEDAMO, KDAJ JE BILA NAZADNJE DODANA STRAN IZ TE DOMENE
+        # ČE JE ČAS OK, POTEM GA SPUSTI NAPREJ DA OBDELA STRAN SICER POČAKAJ...
+        # KO ČAS PRETEČE PONOVNO PREVERI ALI JE DOVOLJENO NA STRAN(ČAS ZANDNJE DODANE STRANI IZ DOMENE)
+        
         try:
             stran = requests.get(url, timeout=(3, 30))
             return stran
@@ -73,9 +79,9 @@ class VecNitniPajek:
         """
         linki = self.vmesnik.poisci_linke(url)
         for link in linki:
-            print(link)
+            # print(link)
             link = link.get_property("href")
-            print(link)
+            # print(link)
             # Pogledamo ali najden url ustreza zahtevam domene ter robots.txt datoteke 
             # TODO - POTREBNO JE PREGLEDATI ROBOTS DATOTEKO IN USTREZNO REAGIRATI!!!
             #        ČE NI ROBOTS.TXT DATOTEKE PA ČASOVNO OMEJITI ŠTEVILO DOSTOPOV 
@@ -104,6 +110,10 @@ class VecNitniPajek:
         #self.baza.dodaj_vsebino(vsebina)
         print(vsebina)
         print("\nDodano v bazo\n")
+
+        # TODO DAJMO SI SHRANJEVAT ČE PRIDE KJE DO NAPAKE IN SICER V NEKO NOVO TABELO, DA BOMO LAHKO VEDELI
+        # SHANIMO SI LINK IN PA BESEDILO NAPAKE
+        # TA LINK MORAMO PONOVNO PREGLEDATI!!! 
 
     def info(self):
         print('\n Obdelane strani: ', self.obiskane_strani, '\n')
