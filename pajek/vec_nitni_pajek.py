@@ -96,9 +96,9 @@ class VecNitniPajek:
         if rezultat_strani and rezultat_strani.status_code == 200:
             # najprej pridobimo nedovoljene strani iz robots.txt
             self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url))
-            self.pridobi_linke(rezultat_strani.url)
             self.pridobi_vsebino(rezultat_strani.url)
             # TODO - POTREBNO JE TUDI PREVERITI LINKE SLIK IN JIH USTREZNO DODATI V BAZO
+            self.pridobi_linke(rezultat_strani.url)
 
     def pridobi_vsebino(self, url):
         """
