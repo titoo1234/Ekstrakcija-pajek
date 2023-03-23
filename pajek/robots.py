@@ -84,19 +84,19 @@ class Robot:
 
     @property
     def disallow(self):
-        return self.beri_robots_datoteko(self.vsebina, "Disallow")
+        return self.beri_robots_datoteko(self.robots_dat, "Disallow")
     
     @property
     def user_agent(self):
-        return self.beri_robots_datoteko(self.vsebina, "User-agent")
+        return self.beri_robots_datoteko(self.robots_dat, "User-agent")
     
     @property
     def allow(self):
-        return self.beri_robots_datoteko(self.vsebina, "Allow")
+        return self.beri_robots_datoteko(self.robots_dat, "Allow")
     
     @property
     def crawl_delay(self):
-        return self.beri_robots_datoteko(self.vsebina, "Crawl-delay")
+        return self.beri_robots_datoteko(self.robots_dat, "Crawl-delay")
 
     @staticmethod
     def beri_robots_datoteko(niz, atribut):
