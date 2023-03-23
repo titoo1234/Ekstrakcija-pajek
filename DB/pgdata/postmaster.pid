@@ -5,4 +5,5 @@
 /var/run/postgresql
 *
   5432001         0
-ready   
+stopping
+
