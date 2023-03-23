@@ -15,3 +15,9 @@ Sitemap: https://www.gov.si/sitemap.xml
 
 
 print(RobotsFile.razdeli_robots_datoteko(niz)[2])
+
+a = Robot(RobotsFile.razdeli_robots_datoteko(niz)[0])
+
+print(a.disallow)
+
+
