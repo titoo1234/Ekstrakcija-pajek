@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from baza import Baza
 from vmesnik import Vmesnik
-from robots import Robots
+from robots import Robot,RobotsFile
 import time
 
 class VecNitniPajek:
@@ -21,7 +21,7 @@ class VecNitniPajek:
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
-        self.robots = Robots()
+        self.robots = Robot()
         # Napolnimo frontier s semenskimi stranmi
         for semenska_stran in semenske_strani: self.frontier.put(semenska_stran)
 
@@ -34,8 +34,11 @@ class VecNitniPajek:
             try:
                 print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
                 naslednji_url = self.frontier.get(timeout=60)
-
-                if naslednji_url not in self.obiskane_strani:
+                robotsfile = RobotsFile(naslednji_url,self.baza,self.vmesnik)
+                robot = robotsfile.robot
+                if self.baza.poglej_domeno(naslednji_url)[0] == 0: #Domena še ne obstaja
+                    self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+                if (naslednji_url not in self.obiskane_strani) and robot.preveri_link(naslednji_url):
                     print(f"\nPreglejevanje strani: {naslednji_url}\n")
                     self.obiskane_strani.add(naslednji_url)
                     i +=1
@@ -53,6 +56,7 @@ class VecNitniPajek:
         Metoda odpre podano stran
         """
         # TODO POGLEDAMO V ROBOTSE DOMENE, KI SO ŽE ZAPISANI V BAZI
+        # čas = robot.čas
         # pogledamo dovoljeni čas
         # POGLEDAMO, KDAJ JE BILA NAZADNJE DODANA STRAN IZ TE DOMENE
         # ČE JE ČAS OK, POTEM GA SPUSTI NAPREJ DA OBDELA STRAN SICER POČAKAJ...
@@ -95,7 +99,8 @@ class VecNitniPajek:
         # TODO - ČE STATUS_CODE != 200 JE POTREBNO VSEENO ZABELEŽITI V BAZO
         if rezultat_strani and rezultat_strani.status_code == 200:
             # najprej pridobimo nedovoljene strani iz robots.txt
-            self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url))
+            # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
+            # self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url))
             self.pridobi_vsebino(rezultat_strani.url)
             # TODO - POTREBNO JE TUDI PREVERITI LINKE SLIK IN JIH USTREZNO DODATI V BAZO
             self.pridobi_linke(rezultat_strani.url)

@@ -1,5 +1,6 @@
 import re
-
+import requests
+from urllib.parse import urljoin, urlparse
 class RobotsFile:
     def __init__(self, url, baza, vmesnik):
         self.url = url
@@ -9,15 +10,27 @@ class RobotsFile:
     @property
     def vsebina(self):
         try:
-            self._vsebina = self.vmesnik.vrni_vsebino(self.url)
+            obdelan_niz = requests.get(self.url, timeout=(3, 30))
+            if obdelan_niz.status_code > 299:
+                return ''
+            obdelan_niz = obdelan_niz.text
+            obdelan_niz = re.sub('#.*','',obdelan_niz)
+            obdelan_niz = re.sub('\n\n','',obdelan_niz)
+            obdelan_niz = re.sub('User-agent','\nUser-agent',obdelan_niz)
+            obdelan_niz = re.sub('Sitemap:','\nSitemap:',obdelan_niz)
+            return obdelan_niz[1:]
         except Exception as e:
             print(e)
-        return self._vsebina
+            return ''
+        
     
     @property
     def url(self):
         return self._url
-        
+
+    @property
+    def domena(self):
+        return urlparse(self.link).netloc        
     
     @url.setter
     def url(self, vrednost):
@@ -26,6 +39,8 @@ class RobotsFile:
 
     @property
     def roboti(self):
+        if not self.vsebina:
+            return [Robot('')]
         tab_robots_dat = self.razdeli_robots_datoteko(self.vsebina)
         # za vsak user-agent naredimo svojega robota
         return [Robot(niz) for niz in tab_robots_dat]
@@ -38,11 +53,12 @@ class RobotsFile:
         pravi_robot = None
         for robot in self.roboti:
             if robot.user_agent == '*':
-                pravi_robot = robot
-        return pravi_robot
+                return robot
+        
     
     @property
     def sitemap(self):
+        
         razdeljena_dat = self.razdeli_robots_datoteko(self.vsebina)
         zadnja_vrstica = razdeljena_dat[-1]
         if zadnja_vrstica.startswith('Sitemap'):
@@ -88,15 +104,25 @@ class Robot:
     
     @property
     def user_agent(self):
-        return self.beri_robots_datoteko(self.robots_dat, "User-agent")
+        user_agent_tab = self.beri_robots_datoteko(self.robots_dat, "User-agent")
+        if user_agent_tab == []:
+            return '*'
+        return user_agent_tab[0]
     
     @property
     def allow(self):
         return self.beri_robots_datoteko(self.robots_dat, "Allow")
     
     @property
+    def noindex(self):
+        return self.beri_robots_datoteko(self.robots_dat, "Noindex")
+    
+    @property
     def crawl_delay(self):
-        return self.beri_robots_datoteko(self.robots_dat, "Crawl-delay")
+        crawl_delay_tab = self.beri_robots_datoteko(self.robots_dat, "Crawl-delay")
+        if crawl_delay_tab == []:
+            return 5
+        return crawl_delay_tab[0]
 
     @staticmethod
     def beri_robots_datoteko(niz, atribut):
@@ -117,3 +143,10 @@ class Robot:
                 # 'ocistimo' kar je desno in levo od nasega niza ki nas zanima in dodamo med tab_nizov
                 tab_nizov.append(niz.strip())
         return tab_nizov
+    
+    def preveri_link(self, link):
+        for dis in self.disallow:
+            ujemanje = dis.replace('*','')
+            if ujemanje[1:] in link:
+                return False
+        return True 

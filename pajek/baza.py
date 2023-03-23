@@ -35,10 +35,10 @@ class Baza():
         cur.close()
         return id, domena
     
-    def dodaj_domeno(self, domena, html_robot, sitemap):
+    def dodaj_domeno(self, domena, robot_txt, sitemap):
         cur = self.conn.cursor()
         print('dodajam domeno')
-        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{html_robot}', '{sitemap}')")
+        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{robot_txt}', '{sitemap}')")
         cur.close()
         return
 
@@ -85,3 +85,4 @@ class Baza():
 
         cur.close()
         return
+    
