@@ -1,6 +1,7 @@
 import re
 import requests
 from urllib.parse import urljoin, urlparse
+from bs4 import BeautifulSoup
 class RobotsFile:
     def __init__(self, url, baza, vmesnik):
         self.url = url
@@ -55,15 +56,13 @@ class RobotsFile:
             if robot.user_agent == '*':
                 return robot
         
-    
     @property
-    def sitemap(self):
-        
+    def sitemap(self):  
         razdeljena_dat = self.razdeli_robots_datoteko(self.vsebina)
         zadnja_vrstica = razdeljena_dat[-1]
         if zadnja_vrstica.startswith('Sitemap'):
-            # pogledamo od Sitemap: naprej in stripamo
-            return zadnja_vrstica[8:].strip()
+            # pogledamo od 'Sitemap:' naprej in stripamo ter naredimo objekt Sitemap
+            return Sitemap(zadnja_vrstica[8:].strip())
         return None
     
     @staticmethod
@@ -150,3 +149,22 @@ class Robot:
             if ujemanje[1:] in link:
                 return False
         return True 
+
+class Sitemap:
+    def __init__(self, url):
+        self.url = url
+
+    @property
+    def vsebina(self):
+        stran = None
+        try:
+            stran = requests.get(self.url,
+                                    timeout=(5, 10))
+            stran.raise_for_status()
+    
+        except requests.exceptions.RequestException:
+            print(f"\nPriplo je do napaka pri dostopu do strani: {self.url}\n")
+            # ce pride do napake vrnemo prazen niz
+            return ''
+        
+        return stran.text

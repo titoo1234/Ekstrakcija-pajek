@@ -20,14 +20,15 @@ http://gov.si/",
 """
 vmesnik1 = Vmesnik()
 
-# r = RobotsFile('https://www.e-prostor.gov.si',None,vmesnik1)
+r = RobotsFile('http://evem.gov.si',None,vmesnik1)
 # r = RobotsFile('https://e-uprava.gov.si',None,vmesnik1)
+print(r.sitemap.vsebina)
 
 # a=r.robot
 # print(a.user_agent)
-import requests
-a = requests.get('http://e-uprava.gov.si/robots.txt', timeout=(3, 30))
-print(a.text)
+# import requests
+# a = requests.get('http://e-uprava.gov.si/robots.txt', timeout=(3, 30))
+# print(a.text)
 
 # print(r.vsebina)
 # a = Robot(RobotsFile.razdeli_robots_datoteko(niz)[0])
