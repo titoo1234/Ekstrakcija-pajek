@@ -28,11 +28,23 @@ class Vmesnik():
         povezave = self.vmesnik.find_elements(By.XPATH, "//a[@href]")
         #TREBA JIH BO OBDELAT
         return povezave
-    
+    def nastavi_stran(self,url):
+        self.vmesnik.get(url)
+
+    def preveri_sliko(self,slika):
+        '''
+            preveri ali je forma slike OK(slike v string formatu ne shranimo...)
+        '''
+        dovoljene_koncnice = ['.ico', '.cur','.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp','.png','.svg','.apng','.gif']
+        for koncina in dovoljene_koncnice:
+            if koncina in slika:
+                return True
+        return False
     def poisci_slike(self):
         #self.vmesnik.get(povezava)
         slike = self.vmesnik.find_elements(By.TAG_NAME, "img")
-        #TREBA JIH BO OBDELAT
+        slike = [slika.get_attribute("src") for slika in slike]
+        slike = [slika for slika in slike if self.preveri_sliko(slika)]
         return slike
     
     def pojdi_na_stran(self, povezava):

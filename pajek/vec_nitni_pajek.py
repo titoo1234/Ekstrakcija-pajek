@@ -51,7 +51,7 @@ class VecNitniPajek:
                 print(e)
                 continue
 
-    def obdelaj_stran(self, url):
+    def  obdelaj_stran(self, url):
         """
         Metoda odpre podano stran
         """
@@ -82,17 +82,16 @@ class VecNitniPajek:
         Metoda pridobi vse linke na trenutni strani
         """
         linki = self.vmesnik.poisci_linke(url)
+
         for link in linki:
             # print(link)
-            link = link.get_property("href")
-            # print(link)
-            # Pogledamo ali najden url ustreza zahtevam domene ter robots.txt datoteke 
-            # TODO - POTREBNO JE PREGLEDATI ROBOTS DATOTEKO IN USTREZNO REAGIRATI!!!
-            #        ČE NI ROBOTS.TXT DATOTEKE PA ČASOVNO OMEJITI ŠTEVILO DOSTOPOV 
-            if self.zadosca_domeni(link) and self.robots.zadosca_robots_datoteki(link):
+            link = link.get_property("href") 
+            if self.robots.zadosca_robots_datoteki(link):
                 # Pogledamo ali je najden url že slučanjo med pregledanimi stranmi ali med nedovoljenimi stranmi
                 if link not in self.obiskane_strani and link not in self.nedovoljene_strani:
-                    self.frontier.put(link)
+                    if not self.baza.tuja_domena(link):
+                        self.frontier.put(link)
+                    self.baza.dodaj_link_frontier(url,link)#doda v bazo, kot tujo stran, doda tudi domeno od strani
 
     def konec_obdelave_strani(self, stran):
         rezultat_strani = stran.result()
@@ -101,10 +100,32 @@ class VecNitniPajek:
             # najprej pridobimo nedovoljene strani iz robots.txt
             # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
             # self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url))
+            
+            
             self.pridobi_vsebino(rezultat_strani.url)
+            
+            self.shrani_v_bazo(rezultat_strani.url)
+
             # TODO - POTREBNO JE TUDI PREVERITI LINKE SLIK IN JIH USTREZNO DODATI V BAZO
             self.pridobi_linke(rezultat_strani.url)
+            self.shrani_slike(rezultat_strani.url)
+            return
 
+
+            
+
+    def shrani_slike(self,id_strani,):
+        slike = self.vmesnik.poisci_slike()
+        self.baza.dodaj_slike()
+    def shrani_v_bazo(self,url):
+        '''
+            napolni podatke o strani: poišče page in ga spremeni
+        '''
+        # preveri če je duplikat:
+            # select count(*) from page where vsebina = vsbina_trenutne strani vmensik.vrni_vsebino
+        # if duplikat():
+            # baza.shrani_duplikat(link)
+ 
     def pridobi_vsebino(self, url):
         """
         Metoda pridobi html vsebino strani in jo doda v bazo

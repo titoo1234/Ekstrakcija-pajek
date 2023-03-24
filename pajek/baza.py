@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 from urllib.parse import urlparse, urljoin
 from frontier import Frontier
+from robots import Robot,RobotsFile
 
 class Baza():
     def __init__(self):
@@ -43,11 +44,12 @@ class Baza():
         return
 
 
-    def dodaj_slike(self, slike):
+    def dodaj_slike(self, slike,link_id):
         cur = self.conn.cursor()
         for slika in slike:
-            s = slika.get_attribute("src")
-            #cur.execute(f"Insert into crawldb.image (link, status) values ('{link}', 0)")
+            koncnica = slika.split('.')[-1]
+
+            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,data,accessed_time) values ('{link_id}', 0)")
             #TREBA DODAT OB PRAVEM ČASU KER SO V BAZI TUJI KLJUČI
         cur.close()
         return
@@ -85,4 +87,49 @@ class Baza():
 
         cur.close()
         return
+    
+    def dodaj_link_frontier(self,link1,link2,id_link1):
+        '''
+            doda link v bazo z lastnostjo FRONTIER, doda se tudi v tabelo link1 -> link2 
+        '''
+        # preverimo ali je že domena od linka2 v bazi:
+        robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
+        robot = robotsfile.robot
+        if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
+            self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+        id = self.baza.poglej_domeno(link2)[0]
+        cur = self.conn.cursor()
+        if self.tuja_domena(link2):
+            cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'ZUNANJA', '{link2}')")
+        else:
+            cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'FRONTIER', '{link2}')")
+
+        cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link1}'")
+        id_link1 = cur.fetchone()
+        cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link2}'")
+        id_link2 = cur.fetchone()
+        # dodamo še link1 -> link2 
+        cur.execute(f"INSERT INTO crawldb.link (from_page, to_page) VALUES ({id_link1}, {id_link2})")
+        cur.close()
+        return
+    
+    def tuja_domena(self,link):
+        domena = urlparse(link).netloc
+        if "gov.si" in domena:
+            return False
+        return True
+
+        
+
+
+    def dodaj_domeno(self, domena, robot_txt, sitemap):
+        cur = self.conn.cursor()
+        print('dodajam domeno')
+        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{robot_txt}', '{sitemap}')")
+        cur.close()
+        return
+    
+
+
+
     
