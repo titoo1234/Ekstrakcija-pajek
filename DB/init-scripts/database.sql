@@ -15,6 +15,7 @@ CREATE TABLE crawldb.site (
 	"domain"             varchar(500)  ,
 	robots_content       text  ,
 	sitemap_content      text  ,
+	crawl_delay				 real  ,--dodano
 	CONSTRAINT pk_site_id PRIMARY KEY ( id )
  );
 
