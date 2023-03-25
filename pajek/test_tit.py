@@ -29,9 +29,9 @@ img = Image.open(BytesIO(response.content))
 
 
 
-content = img.read()
-print(binascii.hexlify(content))
-print(img.getdata())
+# content = img.read()
+# print(binascii.hexlify(content))
+print(img.tostring())
 
 
 # Image.open(urlopen(url))
