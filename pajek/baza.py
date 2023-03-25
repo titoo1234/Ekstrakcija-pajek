@@ -95,6 +95,7 @@ class Baza():
 
         cur.close()
         return
+    
     def preveri_in_dodaj_domeno(self,link2):
         if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
             robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
@@ -115,13 +116,13 @@ class Baza():
             id = self.baza.poglej_domeno(link2)[0]
             cur = self.conn.cursor()
             if self.tuja_domena(link2):
-                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'ZUNANJA', '{link2}')")
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id}, 'ZUNANJA', {link2})")
             else:
-                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'FRONTIER', '{link2}')")
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id}, 'FRONTIER', {link2})")
 
-        cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link1}'")
+        cur.execute(f"SELECT id FROM crawldb.page WHERE url = {link1}")
         id_link1 = cur.fetchone()
-        cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link2}'")
+        cur.execute(f"SELECT id FROM crawldb.page WHERE url = {link2}")
         id_link2 = cur.fetchone()
         # dodamo še link1 -> link2 
         cur.execute(f"INSERT INTO crawldb.link (from_page, to_page) VALUES ({id_link1}, {id_link2})")
@@ -133,9 +134,14 @@ class Baza():
         if "gov.si" in domena:
             return False
         return True
-
         
-
+    def pridobi_robots_datoteko(self, link):
+        cur = self.conn.cursor()
+        domena = urlparse(link).netloc
+        cur.execute(f"SELECT robots-content FROM crawldb.site WHERE domain = {domena}")
+        robots = cur.fetchone()
+        cur.close()
+        return robots
 
     def dodaj_domeno(self, domena, robot_txt, sitemap):
         cur = self.conn.cursor()
