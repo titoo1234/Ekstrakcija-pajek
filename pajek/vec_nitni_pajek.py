@@ -109,9 +109,11 @@ class VecNitniPajek:
             
             self.baza.preveri_in_dodaj_domeno(link)
 
-            #PRIDOBI NEDOVOLJENE STRANI
-            nedovoljene_strani = []# TODO potrebno narediti funkcijo ki iz baze vzame robots.txt in vrne nedovoljene strani za dano domeno
 
+            #PRIDOBI NEDOVOLJENE STRANI
+            # Želim funkcijo, ki NE GRE NA NET 
+            nedovoljene_strani = []# TODO potrebno narediti funkcijo ki iz baze vzame robots.txt in vrne nedovoljene strani za dano domeno
+            
             if link in  self.obiskane_strani:
                 self.baza.dodaj_link_frontier(url,link,True)#TRUE -> doda samo v tabelo linkov 
             #TO NE VEM ZAKA JE?
