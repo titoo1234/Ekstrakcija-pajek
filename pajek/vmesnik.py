@@ -24,9 +24,8 @@ class Vmesnik():
         return povezave
     
     def poisci_linke(self, url):
-        self.vmesnik.get(url)
+        # self.vmesnik.get(url)
         povezave = self.vmesnik.find_elements(By.XPATH, "//a[@href]")
-        #TREBA JIH BO OBDELAT
         return povezave
     def nastavi_stran(self,url):
         self.vmesnik.get(url)

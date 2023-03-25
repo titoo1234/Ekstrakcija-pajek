@@ -16,6 +16,7 @@ CREATE TABLE crawldb.site (
 	robots_content       text  ,
 	sitemap_content      text  ,
 	crawl_delay				 real  ,--dodano
+	zadnji_dostop        timestamp  ,--dodano
 	CONSTRAINT pk_site_id PRIMARY KEY ( id )
  );
 

@@ -73,7 +73,7 @@ class RobotsFile:
         """
         return niz.split('\n\n')
     
-    def zadosca_robots_datoteki(self, link):
+    def zadosca_robots_datoteki(self, link): #KA JE TO? 
         # TODO dodaj omejitve!!!
         return True
     
@@ -121,7 +121,7 @@ class Robot:
         crawl_delay_tab = self.beri_robots_datoteko(self.robots_dat, "Crawl-delay")
         if crawl_delay_tab == []:
             return 5
-        return crawl_delay_tab[0]
+        return float(crawl_delay_tab[0])
 
     @staticmethod
     def beri_robots_datoteko(niz, atribut):

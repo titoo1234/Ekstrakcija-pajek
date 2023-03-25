@@ -9,7 +9,7 @@ import time
 from urllib.parse import urlparse, urljoin
 from frontier import Frontier
 from robots import Robot,RobotsFile
-
+import os
 class Baza():
     def __init__(self):
         self.conn = psycopg2.connect(host="localhost", user="user", password="SecretPassword")
@@ -36,10 +36,11 @@ class Baza():
         cur.close()
         return id, domena
     
-    def dodaj_domeno(self, domena, robot_txt, sitemap):
+    def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
         cur = self.conn.cursor()
+        trenutni_cas = time.time()
         print('dodajam domeno')
-        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{robot_txt}', '{sitemap}')")
+        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,trenutni_cas) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},{trenutni_cas})")
         cur.close()
         return
 
@@ -48,11 +49,18 @@ class Baza():
         cur = self.conn.cursor()
         for slika in slike:
             koncnica = slika.split('.')[-1]
-
-            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,data,accessed_time) values ('{link_id}', 0)")
-            #TREBA DODAT OB PRAVEM ČASU KER SO V BAZI TUJI KLJUČI
+            filename = os.path.basename(slika)
+            # ZAENKRAT NE DODAJAMO DATA!!!
+            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,accessed_time) values ('{link_id}',{filename},{koncnica},{time.time()})")
         cur.close()
         return
+    
+    def id_strani(self,url):
+        cur = self.conn.cursor()
+        cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{url}'")
+        rez = cur.fetchone()
+        cur.close()
+        return rez
     
     def zbrisi_vse_iz_baze(self,frontier,vmesnik):
         cur = self.conn.cursor()
@@ -87,22 +95,29 @@ class Baza():
 
         cur.close()
         return
-    
-    def dodaj_link_frontier(self,link1,link2,id_link1):
+    def preveri_in_dodaj_domeno(self,link2):
+        if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
+            robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
+            robot = robotsfile.robot
+            self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+            
+    def dodaj_link_frontier(self,link1,link2,nepreskoci = True):
         '''
             doda link v bazo z lastnostjo FRONTIER, doda se tudi v tabelo link1 -> link2 
         '''
+        # NE BO TREBA PREVERJAT KER SMO ŽE PREJ ZAGOTOVILI DA JE DOMENA V BAZI!!!
         # preverimo ali je že domena od linka2 v bazi:
-        robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
-        robot = robotsfile.robot
-        if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
-            self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
-        id = self.baza.poglej_domeno(link2)[0]
-        cur = self.conn.cursor()
-        if self.tuja_domena(link2):
-            cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'ZUNANJA', '{link2}')")
-        else:
-            cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'FRONTIER', '{link2}')")
+        # robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
+        # robot = robotsfile.robot
+        # if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
+        #     self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+        if nepreskoci:
+            id = self.baza.poglej_domeno(link2)[0]
+            cur = self.conn.cursor()
+            if self.tuja_domena(link2):
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'ZUNANJA', '{link2}')")
+            else:
+                cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ('{id}', 'FRONTIER', '{link2}')")
 
         cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link1}'")
         id_link1 = cur.fetchone()
@@ -124,11 +139,28 @@ class Baza():
 
     def dodaj_domeno(self, domena, robot_txt, sitemap):
         cur = self.conn.cursor()
-        print('dodajam domeno')
         cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{robot_txt}', '{sitemap}')")
         cur.close()
         return
     
+    def spremenini_obstojeci_page(self,url,vsebina,http_status_koda):
+        cur = self.conn.cursor()
+        if self.je_duplikat(vsebina):
+            cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('DUPLICATE','{vsebina}',{http_status_koda},{time.time()}) WHERE url = {url}")
+        else:
+            cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('HTML','{vsebina}',{http_status_koda},{time.time()}) WHERE url = {url}")
+
+    def je_duplikat(self,vsebina):
+        cur = self.conn.cursor()
+        cur.execute(f"SELECT COUNT(*) from crawldb.page WHERE html_content = {vsebina}")
+        stevilo_istih_strani = cur.fetchone()
+        cur.close()
+        if stevilo_istih_strani > 0:
+            return True
+        return False
+            
+        
+
 
 
 

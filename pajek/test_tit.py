@@ -1,4 +1,5 @@
 from urllib.parse import urljoin, urlparse
+import os
 
 import vmesnik
 SEEDs = [
@@ -24,17 +25,20 @@ from PIL import Image
 import requests
 from io import BytesIO
 url = 'https://www.gov.si/assets/vladne-sluzbe/UKOM/gov-si/Fotografije/sodeluj/GettyImages-166000471-republica__FillWzQ0MCwyOTIsImE1MjU3MmM1MTYiXQ.jpg'
-response = requests.get(url)
-img = Image.open(BytesIO(response.content))
+# response = requests.get(url)
+# img = Image.open(BytesIO(response.content))
 
 
 
 # content = img.read()
 # print(binascii.hexlify(content))
-print(img.tostring())
+# print(img.tostring())
 
 
 # Image.open(urlopen(url))
 # with open(filename, 'rb') as f:
 #     content = f.read()
 # print(binascii.hexlify(content))
+# print(os.path.basename(url))
+byte_obj = url.encode('ascii') 
+print(byte_obj)
