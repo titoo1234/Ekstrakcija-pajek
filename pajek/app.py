@@ -15,7 +15,7 @@ SEMENSKE_STRANI = ["http://gov.si/",
                    "http://evem.gov.si/",
                    "http://e-uprava.gov.si/",
                    "http://e-prostor.gov.si/"]
-ST_PAJKOV = 5
+ST_PAJKOV = 1
 DOMENA = ".gov.si"
 
 
