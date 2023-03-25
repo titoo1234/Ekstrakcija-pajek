@@ -42,3 +42,16 @@ url = 'https://www.gov.si/assets/vladne-sluzbe/UKOM/gov-si/Fotografije/sodeluj/G
 # print(os.path.basename(url))
 byte_obj = url.encode('ascii') 
 print(byte_obj)
+
+
+
+# ALTER TABLE crawldb.site
+# ADD COLUMN crawl_delay real
+
+# ALTER TABLE crawldb.site
+# ADD COLUMN zadnji_dostop timestamp
+
+# INSERT INTO crawldb.page_type VALUES ('ZUNANJI')
+
+
+
