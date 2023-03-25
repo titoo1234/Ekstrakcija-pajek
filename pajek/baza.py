@@ -152,7 +152,7 @@ class Baza():
     def spremenini_obstojeci_page(self,url,vsebina,http_status_koda):
         cur = self.conn.cursor()
         if self.je_duplikat(vsebina):
-            cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('DUPLICATE','{vsebina}',{http_status_koda},{time.time()}) WHERE url = {url}")
+            cur.execute(f"UPDATE crawldb.page SET (page_type_code,http_status_code,accessed_time) = ('DUPLICATE',{http_status_koda},{time.time()}) WHERE url = {url}")
         else:
             cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('HTML','{vsebina}',{http_status_koda},{time.time()}) WHERE url = {url}")
 
