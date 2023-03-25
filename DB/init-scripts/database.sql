@@ -105,6 +105,7 @@ INSERT INTO crawldb.page_type VALUES
 	('HTML'),
 	('BINARY'),
 	('DUPLICATE'),
+	('ZUNANJI'),--DODANO
 	('FRONTIER');
 
 INSERT INTO crawldb.frontier (link, status) VALUES 

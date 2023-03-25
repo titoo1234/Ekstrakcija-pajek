@@ -10,6 +10,7 @@ from urllib.parse import urlparse, urljoin
 from frontier import Frontier
 from robots import Robot,RobotsFile
 import os
+from datetime import datetime, timezone
 class Baza():
     def __init__(self):
         self.conn = psycopg2.connect(host="localhost", user="user", password="SecretPassword")
@@ -35,14 +36,7 @@ class Baza():
             id = id_domene[0]
         cur.close()
         return id, domena
-    
-    def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
-        cur = self.conn.cursor()
-        trenutni_cas = time.time()
-        print('dodajam domeno')
-        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,trenutni_cas) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},{trenutni_cas})")
-        cur.close()
-        return
+
 
 
     def dodaj_slike(self, slike,link_id):
@@ -96,11 +90,10 @@ class Baza():
         cur.close()
         return
     
-    def preveri_in_dodaj_domeno(self,link2):
-        if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
-            robotsfile = RobotsFile(link2,self.baza,self.vmesnik)
-            robot = robotsfile.robot
-            self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+    def preveri_in_dodaj_domeno(self,link2,vmesnik):
+        if self.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
+            robotsfile = RobotsFile(link2,self,vmesnik)
+            self.dodaj_domeno(robotsfile.domena, robotsfile.vsebina, robotsfile.sitemap,robotsfile.robot.crawl_delay)
             
     def dodaj_link_frontier(self,link1,link2,nepreskoci = True):
         '''
@@ -143,9 +136,13 @@ class Baza():
         cur.close()
         return robots
 
-    def dodaj_domeno(self, domena, robot_txt, sitemap):
+
+        
+    def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
         cur = self.conn.cursor()
-        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content) VALUES ('{domena}', '{robot_txt}', '{sitemap}')")
+        trenutni_cas = datetime.now()
+        print('dodajam domeno')
+        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')")
         cur.close()
         return
     

@@ -21,7 +21,7 @@ class VecNitniPajek:
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
-        self.robots = Robot()
+        # self.robots = Robot('')
         # Napolnimo frontier s semenskimi stranmi
         for semenska_stran in semenske_strani: self.frontier.put(semenska_stran)
 
@@ -31,44 +31,29 @@ class VecNitniPajek:
         """
         i = 1
         while i < 5:
-            try:
-                print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
-                naslednji_url = self.frontier.get(timeout=60)
-                # ne smem narediti robotsfile, najprej pogledamo če obstaja
-                # robotsfile = RobotsFile(naslednji_url,self.baza,self.vmesnik)
-                # robot = robotsfile.robot
-                self.baza.preveri_in_dodaj_domeno(naslednji_url)
-                # if self.baza.poglej_domeno(naslednji_url)[0] == 0: #Domena še ne obstaja
-                #     robotsfile = RobotsFile(naslednji_url,self.baza,self.vmesnik)
-                #     robot = robotsfile.robot
-                #     self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap,robot.crawl_delay)
+            # try:
+            print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
+            naslednji_url = self.frontier.get(timeout=60)
 
-                #Domena obstaja:
+            self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
 
-                crawl_delay = 5 #crawl_delay_domene(naslednji_url) 
-                #spustimo naprej ko bomo lahko...
+            crawl_delay = 5 #crawl_delay_domene(naslednji_url) 
+            
+            if (naslednji_url not in self.obiskane_strani):
+                
 
-                # MISLIM DA NAM TUKAJ NI POTREBNO PREVERJATI STRANI KER BOMO V FRONTIER DODAJALI SAMO STRANI KI SO DOVOLJENE
-                # if not robot.preveri_link_iz_baze(naslednji_url):
-                #     #ali moramo preveriti stran?
-                #     continue
-
-                # TUDI MISLIM DA NI TREBA PREVERITI ALI JE LINK ŽE PREGLEDAN?
-                if (naslednji_url not in self.obiskane_strani):
-                    
-
-                    
-                    print(f"\nPreglejevanje strani: {naslednji_url}\n")
-                    self.obiskane_strani.add(naslednji_url)
-                    i +=1
-                    pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
-                    pajek.add_done_callback(self.konec_obdelave_strani)
-            except Empty:
-                # v frontierju ni več linkov na razpolago
-                return
-            except Exception as e:
-                print(e)
-                continue
+                
+                print(f"\nPreglejevanje strani: {naslednji_url}\n")
+                self.obiskane_strani.add(naslednji_url)
+                i +=1
+                pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
+                pajek.add_done_callback(self.konec_obdelave_strani)
+            # except Empty:
+            #     # v frontierju ni več linkov na razpolago
+            #     return
+            # except Exception as e:
+            #     print(e)
+            #     continue
 
     def  obdelaj_stran(self, url):
         """
@@ -107,13 +92,13 @@ class VecNitniPajek:
             link = link.get_property("href") 
             #POGLEJMO DOMENO ČE JE NI JO DODAJ
             
-            self.baza.preveri_in_dodaj_domeno(link)
+            self.baza.preveri_in_dodaj_domeno(link,self.vmesnik)
 
 
             #PRIDOBI NEDOVOLJENE STRANI
             # Želim funkcijo, ki NE GRE NA NET 
             nedovoljene_strani = []# TODO potrebno narediti funkcijo ki iz baze vzame robots.txt in vrne nedovoljene strani za dano domeno
-            
+
             if link in  self.obiskane_strani:
                 self.baza.dodaj_link_frontier(url,link,True)#TRUE -> doda samo v tabelo linkov 
             #TO NE VEM ZAKA JE?

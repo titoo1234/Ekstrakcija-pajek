@@ -31,7 +31,7 @@ class RobotsFile:
 
     @property
     def domena(self):
-        return urlparse(self.link).netloc        
+        return urlparse(self.url).netloc        
     
     @url.setter
     def url(self, vrednost):
@@ -62,8 +62,8 @@ class RobotsFile:
         zadnja_vrstica = razdeljena_dat[-1]
         if zadnja_vrstica.startswith('Sitemap'):
             # pogledamo od 'Sitemap:' naprej in stripamo ter naredimo objekt Sitemap
-            return Sitemap(zadnja_vrstica[8:].strip())
-        return None
+            return zadnja_vrstica[8:].strip()
+        return ''
     
     @staticmethod
     def razdeli_robots_datoteko(niz):
