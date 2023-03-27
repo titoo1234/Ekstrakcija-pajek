@@ -66,16 +66,6 @@ CREATE TABLE crawldb.link (
 	CONSTRAINT _0 PRIMARY KEY ( from_page, to_page )
  );
 
-CREATE TABLE IF NOT EXISTS crawldb.frontier
-(
-    id integer NOT NULL DEFAULT nextval('crawldb.frontier_id_seq'::regclass),
-    link character varying(3000) COLLATE pg_catalog."default" NOT NULL,
-    status integer NOT NULL,
-    CONSTRAINT frontier_pkey PRIMARY KEY (id)
-) 
-
-
-
 CREATE INDEX "idx_link_from_page" ON crawldb.link ( from_page );
 
 CREATE INDEX "idx_link_to_page" ON crawldb.link ( to_page );
