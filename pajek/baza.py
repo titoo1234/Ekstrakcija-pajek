@@ -40,10 +40,22 @@ class Baza():
     def pridobi_site(self, domena):
         cur = self.conn.cursor()
         cur.execute(f"SELECT * FROM crawldb.site WHERE domain = '{domena}'")
-        site = cur.fetchone()[0]
-        print(site)
+        site = cur.fetchone()
         cur.close()
         return site
+    
+    def pridobi_data_type(self):
+        cur = self.conn.cursor()
+        cur.execute(f"SELECT * FROM crawldb.data_type")
+        data_types = cur.fetchall()
+        cur.close()
+        return data_types
+    
+    def dodaj_page_data_v_bazo(self, page_id, data_type_code, data):
+        cur = self.conn.cursor()
+        cur.execute(f"INSERT INTO crawldb.page_data (page_id, data_type_code, data) VALUES ({page_id}, '{data_type_code}', '{data}')")
+        cur.close()
+        return
 
     def dodaj_slike(self, slike,link_id):
         cur = self.conn.cursor()
@@ -51,7 +63,7 @@ class Baza():
             koncnica = slika.split('.')[-1]
             filename = os.path.basename(slika)
             # ZAENKRAT NE DODAJAMO DATA!!!
-            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,accessed_time) values ('{link_id}',{filename},{koncnica},{time.time()})")
+            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,accessed_time) values ('{link_id}','{filename}','{koncnica}',{time.time()})")
         cur.close()
         return
     
@@ -146,8 +158,9 @@ class Baza():
     def dodaj_page_v_bazo(self, site_id, page_type_code, url, html_content, http_status_code, accessed_time):
         cur = self.conn.cursor()
         cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url, html_content, http_status_code, accessed_time) VALUES ('{site_id}', '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}')")
+        id = cur.lastrowid
         cur.close()
-        return 
+        return id
         
     def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
         cur = self.conn.cursor()

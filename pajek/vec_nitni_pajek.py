@@ -17,8 +17,8 @@ class VecNitniPajek:
         self.st_pajkov = st_pajkov
         self.domena = domena
         self.pool = ThreadPoolExecutor(max_workers=self.st_pajkov)
-        self.obiskane_strani = set([])
-        self.nedovoljene_strani = set([]) # tukaj se hranijo strani ki zaradi robots.txt niso dovoljene
+        self.obiskane_strani = set()
+        self.nedovoljene_strani = set() # tukaj se hranijo strani ki zaradi robots.txt niso dovoljene
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
@@ -32,36 +32,36 @@ class VecNitniPajek:
         """
         i = 1
         while i < 5:
-            # try:
-            print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
-            print("\nPridobivanje URL-ja iz frontier-ja...")
-            naslednji_url = self.frontier.get(timeout=60)
-            print(f"\nURL: {naslednji_url} je bil pridobljen iz frontier-ja.")
-            print(f"\nPreverjanje in dodajanje domene ...")
-            self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
-            print("\nDomena je bila preverjenja oz. dodana.")
-            crawl_delay = 5 #crawl_delay_domene(naslednji_url)
-            print(f"\nZaradi robots.txt datoteke oziroma etike bomo čakali: {crawl_delay} sekund") 
-            print("\n\n...")
-            time.sleep(crawl_delay)
-            print("\n\n...")
-            print("\n\nKonec čakanja.")
-            
-            if (naslednji_url not in self.obiskane_strani):
-                print(f"\nDodajanje strani: {naslednji_url} med obiskane strani.")
-                self.obiskane_strani.add(naslednji_url)
-                i +=1
-                print(f"\nOdpiranje strani: {naslednji_url}\n")
-                pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
-                print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
-                pajek.add_done_callback(self.konec_obdelave_strani)
-                print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
-            # except Empty:
-            #     # v frontierju ni več linkov na razpolago
-            #     return
-            # except Exception as e:
-            #     print(e)
-            #     continue
+            try:
+                print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
+                print("\nPridobivanje URL-ja iz frontier-ja...")
+                naslednji_url = self.frontier.get(timeout=60)
+                print(f"\nURL: {naslednji_url} je bil pridobljen iz frontier-ja.")
+                print(f"\nPreverjanje in dodajanje domene ...")
+                self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
+                print("\nDomena je bila preverjenja oz. dodana.")
+                crawl_delay = 5 #crawl_delay_domene(naslednji_url)
+                
+                if (naslednji_url not in self.obiskane_strani):
+                    print(f"\nDodajanje strani: {naslednji_url} med obiskane strani.")
+                    self.obiskane_strani.add(naslednji_url)
+                    i +=1
+                    print(f"\nOdpiranje strani: {naslednji_url}\n")
+                    pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
+                    print(f"\nZaradi robots.txt datoteke oziroma etike bomo čakali: {crawl_delay} sekund") 
+                    print("\n\n...")
+                    print("\n\n...")
+                    time.sleep(crawl_delay)
+                    print("\n\nKonec čakanja.")
+                    print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
+                    pajek.add_done_callback(self.konec_obdelave_strani)
+                    print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
+            except Empty:
+                # v frontierju ni več linkov na razpolago
+                return
+            except Exception as e:
+                print(e)
+                continue
 
     def  obdelaj_stran(self, url):
         """
@@ -98,25 +98,24 @@ class VecNitniPajek:
         linki = self.vmesnik.poisci_linke(url)
 
         for link in linki:
+            print(link)
             link = link.get_property("href") 
             #POGLEJMO DOMENO ČE JE NI JO DODAJ
-            
             self.baza.preveri_in_dodaj_domeno(link,self.vmesnik)
-
-
             #PRIDOBI NEDOVOLJENE STRANI
-            # Želim funkcijo, ki NE GRE NA NET 
-            nedovoljene_strani = []# TODO potrebno narediti funkcijo ki iz baze vzame robots.txt in vrne nedovoljene strani za dano domeno
+            domena = urlparse(url).netloc
+            site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
+            robot = Robot(site[2]) # site[2] je ravno robots datoteka
+            nedovoljene_strani = robot.disallow
+            # KAJ JE TU MIŠLJENO?
+            # if link in self.obiskane_strani:
+            #     self.baza.dodaj_link_frontier(url,link,True)#TRUE -> doda samo v tabelo linkov 
 
-            if link in  self.obiskane_strani:
-                self.baza.dodaj_link_frontier(url,link,True)#TRUE -> doda samo v tabelo linkov 
-            #TO NE VEM ZAKA JE?
-            # if self.robots.zadosca_robots_datoteki(link):
-                # Pogledamo ali je najden url že slučanjo med pregledanimi stranmi ali med nedovoljenimi stranmi
-            if link not in self.obiskane_strani and not self.nedovoljena_stran(link,nedovoljene_strani):#link not in self.nedovoljene_strani:
+            if link not in self.obiskane_strani and not self.nedovoljena_stran(link,nedovoljene_strani):
                 if not self.baza.tuja_domena(link):
                     self.frontier.put(link)
                 self.baza.dodaj_link_frontier(url,link)#doda v bazo, tudi tujo stran
+                self.obiskane_strani.add(link)
 
     def nedovoljena_stran(self,link,tab_ned_strani):
         for dis in tab_ned_strani:
@@ -138,6 +137,7 @@ class VecNitniPajek:
         print(f"\n Konec pridobivanja vsebine iz strani: {page.url}\n")
         print(f"\n Shranjevanje vsebine iz strani: {page.url} v bazo...\n")
         page.dodaj_v_bazo()
+        self.obiskane_strani.add(page.url)
         # self.shrani_v_bazo(page.url,vsebina,page.status_code)
         print(f"\n Konec shranjevanja vsebine iz strani: {page.url} v bazo...\n")
         id_strani = self.baza.id_strani(page.url)
