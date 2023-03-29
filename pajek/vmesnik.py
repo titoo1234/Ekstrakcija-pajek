@@ -39,6 +39,7 @@ class Vmesnik():
             if koncina in slika:
                 return True
         return False
+    
     def poisci_slike(self):
         #self.vmesnik.get(povezava)
         slike = self.vmesnik.find_elements(By.TAG_NAME, "img")

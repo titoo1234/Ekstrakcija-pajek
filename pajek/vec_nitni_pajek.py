@@ -17,8 +17,9 @@ class VecNitniPajek:
         self.st_pajkov = st_pajkov
         self.domena = domena
         self.pool = ThreadPoolExecutor(max_workers=self.st_pajkov)
-        self.obiskane_strani = set()
+        self.preverjeni_linki = set()
         self.nedovoljene_strani = set() # tukaj se hranijo strani ki zaradi robots.txt niso dovoljene
+                                        # TODO: dodaj strani ki so ze v bazi
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
@@ -31,8 +32,9 @@ class VecNitniPajek:
         Ta metoda dodaja nove linke, ki jih najde v html-ju, v frontier
         """
         i = 1
-        while i < 5:
+        while i < 8:
             try:
+                i +=1
                 print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
                 print("\nPridobivanje URL-ja iz frontier-ja...")
                 naslednji_url = self.frontier.get(timeout=60)
@@ -40,22 +42,12 @@ class VecNitniPajek:
                 print(f"\nPreverjanje in dodajanje domene ...")
                 self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
                 print("\nDomena je bila preverjenja oz. dodana.")
-                crawl_delay = 5 #crawl_delay_domene(naslednji_url)
-                
-                if (naslednji_url not in self.obiskane_strani):
-                    print(f"\nDodajanje strani: {naslednji_url} med obiskane strani.")
-                    self.obiskane_strani.add(naslednji_url)
-                    i +=1
-                    print(f"\nOdpiranje strani: {naslednji_url}\n")
-                    pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
-                    print(f"\nZaradi robots.txt datoteke oziroma etike bomo čakali: {crawl_delay} sekund") 
-                    print("\n\n...")
-                    print("\n\n...")
-                    time.sleep(crawl_delay)
-                    print("\n\nKonec čakanja.")
-                    print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
-                    pajek.add_done_callback(self.konec_obdelave_strani)
-                    print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
+                print(f"\nOdpiranje strani: {naslednji_url}\n")
+                pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
+
+                print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
+                pajek.add_done_callback(self.konec_obdelave_strani)
+                print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
             except Empty:
                 # v frontierju ni več linkov na razpolago
                 return
@@ -108,14 +100,14 @@ class VecNitniPajek:
             robot = Robot(site[2]) # site[2] je ravno robots datoteka
             nedovoljene_strani = robot.disallow
             # KAJ JE TU MIŠLJENO?
-            # if link in self.obiskane_strani:
-            #     self.baza.dodaj_link_frontier(url,link,True)#TRUE -> doda samo v tabelo linkov 
+            if link in self.preverjeni_linki:
+                self.baza.dodaj_link_frontier(url,link,False)#TRUE -> doda samo v tabelo linkov 
 
-            if link not in self.obiskane_strani and not self.nedovoljena_stran(link,nedovoljene_strani):
+            if link not in self.preverjeni_linki and not self.nedovoljena_stran(link,nedovoljene_strani):
                 if not self.baza.tuja_domena(link):
                     self.frontier.put(link)
                 self.baza.dodaj_link_frontier(url,link)#doda v bazo, tudi tujo stran
-                self.obiskane_strani.add(link)
+                self.preverjeni_linki.add(link)
 
     def nedovoljena_stran(self,link,tab_ned_strani):
         for dis in tab_ned_strani:
@@ -126,6 +118,7 @@ class VecNitniPajek:
     
     def konec_obdelave_strani(self, stran):
         page = stran.result()
+        self.vmesnik.pojdi_na_stran(page.url)
         # TODO - ČE STATUS_CODE != 200 JE POTREBNO VSEENO ZABELEŽITI V BAZO
         # najprej pridobimo nedovoljene strani iz robots.txt
         # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
@@ -136,8 +129,7 @@ class VecNitniPajek:
         je_duplikat = page.preveri_duplikat()
         print(f"\n Konec pridobivanja vsebine iz strani: {page.url}\n")
         print(f"\n Shranjevanje vsebine iz strani: {page.url} v bazo...\n")
-        page.dodaj_v_bazo()
-        self.obiskane_strani.add(page.url)
+        page.dodaj_ali_posodobi()
         # self.shrani_v_bazo(page.url,vsebina,page.status_code)
         print(f"\n Konec shranjevanja vsebine iz strani: {page.url} v bazo...\n")
         id_strani = self.baza.id_strani(page.url)
@@ -179,7 +171,7 @@ class VecNitniPajek:
         # TA LINK MORAMO PONOVNO PREGLEDATI!!! 
 
     def info(self):
-        print('\n Pridobljeni linki: ', self.obiskane_strani, '\n')
+        print('\n Pridobljeni linki: ', self.preverjeni_linki, '\n')
 
 
     

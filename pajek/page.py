@@ -16,7 +16,7 @@ class Page:
         self.baza = baza
         self.site_id = self.pridobi_site_id()
         self.accessed_time = datetime.now()
-        self.dobljena_stran = self.pridobi_stran(self.url)
+        self.dobljena_stran = self.pridobi_stran()
         self.page_type_code = FRONTIER #stran smo dobili iz frontierja, zato je ob icinializaciji to zagotovo frontier
         self.html_content = None # ob inicializaciji nastavimo html_content na prazen niz
 
@@ -60,6 +60,27 @@ class Page:
             if self.url.endswith(format.lower()):
                 self.page_type_code = BINARY
 
+    def dodaj_ali_posodobi(self):
+        page = self.baza.pridobi_page(self.url)
+        if page:
+            self.posodobi_v_bazi()
+        else:
+            self.dodaj_v_bazo()
+
+    def posodobi_v_bazi(self):
+        id = self.baza.posodobi_page(self.site_id, 
+                                        self.page_type_code,
+                                        self.url,
+                                        self.html_content,
+                                        self.http_status_code,
+                                        self.accessed_time)
+        
+        if self.page_type_code == BINARY:
+            data = self.pridobi_data()
+            self.baza.dodaj_page_data_v_bazo(id,
+                                             self.page_type_code,
+                                             data)
+            
     def dodaj_v_bazo(self):
         id = self.baza.dodaj_page_v_bazo(self.site_id, 
                                         self.page_type_code,
@@ -77,11 +98,25 @@ class Page:
     def pridobi_data(self):
         # TODO - pridobi binary podatke 
         return ""
+    
+    def preveri_dostop_in_cakaj(self):
+        domena = urlparse(self.url).netloc
+        format = "%Y-%m-%d %H:%M:%S.%f"
+        while True:
+            id, domena, robot_content, sitemap_content, crawl_delay, zadnji_dostop_str  = self.baza.pridobi_site(domena)
+            zadnji_dostop = datetime.strptime(str(zadnji_dostop_str), format)
+            pretecen_cas = zadnji_dostop - datetime.now()
+            if pretecen_cas.seconds < crawl_delay:
+                print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
+                time.sleep(crawl_delay - pretecen_cas) # pocakaj da bo dovoljeno
+            else:
+                self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
+                return 
 
-    @staticmethod
-    def pridobi_stran(url):
+    def pridobi_stran(self):
         try:
-            return requests.get(url, timeout=(3, 30))
+            self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
+            return requests.get(self.url, timeout=(3, 30))
         except Exception as e:
             print(e)
             return None

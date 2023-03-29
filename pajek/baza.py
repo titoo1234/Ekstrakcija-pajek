@@ -44,12 +44,25 @@ class Baza():
         cur.close()
         return site
     
+    def pridobi_page(self, url):
+        cur = self.conn.cursor()
+        cur.execute(f"SELECT * FROM crawldb.page WHERE url = '{url}'")
+        page = cur.fetchone()
+        cur.close()
+        return page
+    
     def pridobi_data_type(self):
         cur = self.conn.cursor()
         cur.execute(f"SELECT * FROM crawldb.data_type")
         data_types = cur.fetchall()
         cur.close()
         return data_types
+    
+    def spremeni_cas_domene(self, id):
+        cur = self.conn.cursor()
+        cur.execute(f"UPDATE crawldb.site SET zadnji_dostop = '{datetime.now()}' WHERE id = {id}")
+        cur.close()
+        return
     
     def dodaj_page_data_v_bazo(self, page_id, data_type_code, data):
         cur = self.conn.cursor()
@@ -155,9 +168,16 @@ class Baza():
         cur.close()
         return robots
 
+    def posodobi_page(self, site_id, page_type_code, url, html_content, http_status_code, accessed_time):
+        cur = self.conn.cursor()
+        cur.execute(f"UPDATE crawldb.page SET (site_id, page_type_code, url, html_content, http_status_code, accessed_time) = ({site_id}, '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}') WHERE url = '{url}'")
+        id = cur.lastrowid
+        cur.close()
+        return id
+    
     def dodaj_page_v_bazo(self, site_id, page_type_code, url, html_content, http_status_code, accessed_time):
         cur = self.conn.cursor()
-        cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url, html_content, http_status_code, accessed_time) VALUES ('{site_id}', '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}')")
+        cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url, html_content, http_status_code, accessed_time) VALUES ({site_id}, '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}')")
         id = cur.lastrowid
         cur.close()
         return id
@@ -165,7 +185,7 @@ class Baza():
     def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
         cur = self.conn.cursor()
         trenutni_cas = datetime.now()
-        print(f'\ndodajam domeno: {domena}\n, {crawl_delay}\n')
+        print(f'\ndodajam domeno: {domena}, {crawl_delay}\n')
         # print(f"\nINSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')\n")
         cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content, crawl_delay, zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')")
         cur.close()
