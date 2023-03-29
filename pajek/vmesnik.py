@@ -60,6 +60,7 @@ class Vmesnik():
             return self.vmesnik.find_element(By.TAG_NAME, "body").text
         except TimeoutException:
             print("Predolgo čakanje na stran")
+            return ""
         
 
     def robot(self, link, domena):

@@ -8,6 +8,7 @@ from baza import Baza
 from vmesnik import Vmesnik
 from robots import Robot,RobotsFile
 import time
+from page import *
 
 class VecNitniPajek:
 
@@ -33,21 +34,28 @@ class VecNitniPajek:
         while i < 5:
             # try:
             print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
+            print("\nPridobivanje URL-ja iz frontier-ja...")
             naslednji_url = self.frontier.get(timeout=60)
-
+            print(f"\nURL: {naslednji_url} je bil pridobljen iz frontier-ja.")
+            print(f"\nPreverjanje in dodajanje domene ...")
             self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
-
-            crawl_delay = 5 #crawl_delay_domene(naslednji_url) 
+            print("\nDomena je bila preverjenja oz. dodana.")
+            crawl_delay = 5 #crawl_delay_domene(naslednji_url)
+            print(f"\nZaradi robots.txt datoteke oziroma etike bomo čakali: {crawl_delay} sekund") 
+            print("\n\n...")
+            time.sleep(crawl_delay)
+            print("\n\n...")
+            print("\n\nKonec čakanja.")
             
             if (naslednji_url not in self.obiskane_strani):
-                
-
-                
-                print(f"\nPreglejevanje strani: {naslednji_url}\n")
+                print(f"\nDodajanje strani: {naslednji_url} med obiskane strani.")
                 self.obiskane_strani.add(naslednji_url)
                 i +=1
+                print(f"\nOdpiranje strani: {naslednji_url}\n")
                 pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
+                print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
                 pajek.add_done_callback(self.konec_obdelave_strani)
+                print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
             # except Empty:
             #     # v frontierju ni več linkov na razpolago
             #     return
@@ -67,7 +75,8 @@ class VecNitniPajek:
         # KO ČAS PRETEČE PONOVNO PREVERI ALI JE DOVOLJENO NA STRAN(ČAS ZANDNJE DODANE STRANI IZ DOMENE)
         
         try:
-            stran = requests.get(url, timeout=(3, 30))
+            stran = Page(url, self.vmesnik, self.baza)
+            # stran = requests.get(url, timeout=(3, 30))
             #TRENUTNI ČAS ZABELEŽI V BAZO PRI DOMENI
             return stran
         except requests.RequestException:
@@ -115,24 +124,35 @@ class VecNitniPajek:
             if ujemanje[1:] in link:
                 return True
         return False 
+    
     def konec_obdelave_strani(self, stran):
-        rezultat_strani = stran.result()
+        page = stran.result()
         # TODO - ČE STATUS_CODE != 200 JE POTREBNO VSEENO ZABELEŽITI V BAZO
-        if rezultat_strani and rezultat_strani.status_code == 200:
-            # najprej pridobimo nedovoljene strani iz robots.txt
-            # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
-            # self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(rezultat_strani.url)) 
-            vsebina = self.pridobi_vsebino(rezultat_strani.url)
-            self.shrani_v_bazo(rezultat_strani.url,vsebina,rezultat_strani.status_code)
-            id_strani = self.baza.id_strani(rezultat_strani.url)
-            if not self.baza.je_duplikat(vsebina):
-                self.pridobi_linke(rezultat_strani.url)
-                self.shrani_slike(id_strani)
-                # self.shrani_datoteke(vsebina)
-            return
+        # najprej pridobimo nedovoljene strani iz robots.txt
+        # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
+        # self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(page.url)) 
 
+        print(f"\n Pridobivanje vsebine iz strani: {page.url}...\n")
+        page.html_content = page.pridobi_html()
+        je_duplikat = page.preveri_duplikat()
+        print(f"\n Konec pridobivanja vsebine iz strani: {page.url}\n")
+        print(f"\n Shranjevanje vsebine iz strani: {page.url} v bazo...\n")
+        page.dodaj_v_bazo()
+        # self.shrani_v_bazo(page.url,vsebina,page.status_code)
+        print(f"\n Konec shranjevanja vsebine iz strani: {page.url} v bazo...\n")
+        id_strani = self.baza.id_strani(page.url)
 
-            
+        print(f"\n Preglejevanje duplikatov...\n")
+        if not je_duplikat:
+            print(f"\n Stran: {page.url} ni duplikat!!\n")
+            print(f"\n Pridobivanje linkov iz strani: {page.url}...\n")
+            self.pridobi_linke(page.url)
+            print(f"\n Konec pridobivanja linkov iz strani: {page.url}...\n")
+            print(f"\n Shranjevanje slik iz strani: {page.url}...\n")
+            self.shrani_slike(id_strani)
+            print(f"\n Konec shranjevanja slik iz strani: {page.url}...\n")
+            # self.shrani_datoteke(vsebina)
+        return
 
     def shrani_slike(self,id_strani):
         slike = self.vmesnik.poisci_slike()
