@@ -98,8 +98,8 @@ class VecNitniPajek:
         linki = self.vmesnik.poisci_linke(url)
 
         for link in linki:
-            print(link)
             link = link.get_property("href") 
+            print(link)
             #POGLEJMO DOMENO ČE JE NI JO DODAJ
             self.baza.preveri_in_dodaj_domeno(link,self.vmesnik)
             #PRIDOBI NEDOVOLJENE STRANI
@@ -179,7 +179,7 @@ class VecNitniPajek:
         # TA LINK MORAMO PONOVNO PREGLEDATI!!! 
 
     def info(self):
-        print('\n Obdelane strani: ', self.obiskane_strani, '\n')
+        print('\n Pridobljeni linki: ', self.obiskane_strani, '\n')
 
 
     

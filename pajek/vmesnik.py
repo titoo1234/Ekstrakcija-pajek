@@ -59,7 +59,7 @@ class Vmesnik():
             pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
             return self.vmesnik.find_element(By.TAG_NAME, "body").text
         except TimeoutException:
-            print("Predolgo čakanje na stran")
+            print(f"Predolgo čakanje na stran: {url}")
             return ""
         
 

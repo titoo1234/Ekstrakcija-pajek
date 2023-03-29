@@ -21,7 +21,7 @@ class Baza():
         self.dodaj_slike(slike)
 
     #def dodaj_stran(self,): #site_id nevem
-        #time.time() za accessed time?
+        #datetime.now() za accessed time?
 
     #def dodaj_povezave(self, id1, id2):
 
@@ -63,7 +63,7 @@ class Baza():
             koncnica = slika.split('.')[-1]
             filename = os.path.basename(slika)
             # ZAENKRAT NE DODAJAMO DATA!!!
-            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,accessed_time) values ('{link_id}','{filename}','{koncnica}',{time.time()})")
+            cur.execute(f"Insert into crawldb.image (page_id,filename,content_type,accessed_time) values ('{link_id}','{filename}','{koncnica}','{datetime.now()}')")
         cur.close()
         return
     
@@ -165,17 +165,18 @@ class Baza():
     def dodaj_domeno(self, domena, robot_txt, sitemap,crawl_delay):
         cur = self.conn.cursor()
         trenutni_cas = datetime.now()
-        print('dodajam domeno')
-        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')")
+        print(f'\ndodajam domeno: {domena}\n, {crawl_delay}\n')
+        # print(f"\nINSERT INTO crawldb.site (domain, robots_content, sitemap_content,crawl_delay,zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')\n")
+        cur.execute(f"INSERT INTO crawldb.site (domain, robots_content, sitemap_content, crawl_delay, zadnji_dostop) VALUES ('{domena}', '{robot_txt}', '{sitemap}',{crawl_delay},'{trenutni_cas}')")
         cur.close()
         return
     
     def spremenini_obstojeci_page(self,url,vsebina,http_status_koda):
         cur = self.conn.cursor()
         if self.je_duplikat(vsebina):
-            cur.execute(f"UPDATE crawldb.page SET (page_type_code,http_status_code,accessed_time) = ('DUPLICATE',{http_status_koda},{time.time()}) WHERE url = '{url}'")
+            cur.execute(f"UPDATE crawldb.page SET (page_type_code,http_status_code,accessed_time) = ('DUPLICATE',{http_status_koda},'{datetime.now()}') WHERE url = '{url}'")
         else:
-            cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('HTML','{vsebina}',{http_status_koda},{time.time()}) WHERE url = '{url}'")
+            cur.execute(f"UPDATE crawldb.page SET (page_type_code,html_content,http_status_code,accessed_time) = ('HTML','{vsebina}',{http_status_koda},'{datetime.now()}') WHERE url = '{url}'")
 
     def je_duplikat(self,vsebina):
         cur = self.conn.cursor()
