@@ -4,7 +4,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 class RobotsFile:
     def __init__(self, url, baza, vmesnik):
-        self.url = url
+        self._url = url
         self.baza = baza
         self.vmesnik = vmesnik
 
@@ -15,6 +15,8 @@ class RobotsFile:
             if obdelan_niz.status_code > 299:
                 return ''
             obdelan_niz = obdelan_niz.text
+            if 'html' in obdelan_niz: # preprečimo nedovoljene strani za robots datoteke
+                return ''
             obdelan_niz = re.sub('#.*','',obdelan_niz)
             obdelan_niz = re.sub('\n\n','',obdelan_niz)
             obdelan_niz = re.sub('User-agent','\nUser-agent',obdelan_niz)
@@ -36,7 +38,7 @@ class RobotsFile:
     @url.setter
     def url(self, vrednost):
         # osnovnemu url-ju dodamo končnico /robots.txt
-        self._url = vrednost + "/robots.txt" 
+        self._url = self.domena + "/robots.txt" 
 
     @property
     def roboti(self):
@@ -59,10 +61,10 @@ class RobotsFile:
     @property
     def sitemap(self):  
         razdeljena_dat = self.razdeli_robots_datoteko(self.vsebina)
-        zadnja_vrstica = razdeljena_dat[-1]
-        if zadnja_vrstica.startswith('Sitemap'):
-            # pogledamo od 'Sitemap:' naprej in stripamo ter naredimo objekt Sitemap
-            return zadnja_vrstica[8:].strip()
+        for vrstica in razdeljena_dat:
+            if vrstica.startswith('Sitemap'):
+                # pogledamo od 'Sitemap:' naprej in stripamo ter naredimo objekt Sitemap
+                return vrstica[8:].strip()
         return ''
     
     @staticmethod

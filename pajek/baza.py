@@ -137,9 +137,9 @@ class Baza():
         # robot = robotsfile.robot
         # if self.baza.poglej_domeno(link2)[0] == 0: #Domena še ne obstaja
         #     self.baza.dodaj_domeno(robot.domena, robot.vsebina, robot.sitemap)
+        cur = self.conn.cursor()
         if nepreskoci:
             id = self.poglej_domeno(link2)[0]
-            cur = self.conn.cursor()
             if self.tuja_domena(link2):
                 cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES ({id}, 'ZUNANJA', '{link2}')")
             else:
