@@ -138,7 +138,6 @@ class Page:
         "Funckija obisce stran ter vrne html vsebino."
         try:
             if self.http_status_code < 400:
-                print(self.http_status_code)
                 self.page_type_code = HTML
                 self.preveri_dostop_in_cakaj()
                 return self.vmesnik.vrni_vsebino(self.url)
@@ -285,10 +284,10 @@ class Page:
             #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
             #     time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
             #     cas += crawl_delay - pretecen_cas.seconds
-            if pretecen_cas.seconds < 0.5:
+            if pretecen_cas.seconds < 1:
                 print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
-                time.sleep(0.5) # pocakaj da bo dovoljeno
-                cas += 0.5
+                time.sleep(1) # pocakaj da bo dovoljeno
+                cas += 1
             else:
                 self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
                 return 
