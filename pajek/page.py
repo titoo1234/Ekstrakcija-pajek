@@ -32,18 +32,7 @@ class Page:
 
     @property
     def http_status_code(self):
-        try:
-            if not self._http_status_code and self.page_type_code in [FRONTIER, HTML]:
-                if self.dobljena_stran:
-                    # stran obstaja
-                    return self.dobljena_stran.status_code
-                print(f"\nStran: {self.url} ni bila pridobljena\n")
-                return None 
-            return self._http_status_code
-        except Exception as e:
-            print(f"Napaka: http_status_code: {e}")
-            # Če so bile težave pri pridobivanju spletne strani vrnemo kar None
-            return None
+        return self._http_status_code
     
     @http_status_code.setter
     def http_status_code(self, vrednost):
@@ -51,8 +40,6 @@ class Page:
     
     @property
     def accessed_time(self):
-        if not self._accessed_time: # ce ga se nismo nastavili, ga nastavimo sedaj
-            return datetime.now()
         return self._accessed_time
     
     @accessed_time.setter
@@ -62,6 +49,10 @@ class Page:
     @property
     def dobljena_stran(self):
         return self.pridobi_stran()
+    
+    @dobljena_stran.setter
+    def dobljena_stran(self, vrednost):
+        self._dobljena_stran = vrednost
     
     @property
     def site_id(self):
@@ -73,8 +64,6 @@ class Page:
     
     @property
     def html_content(self):
-        if not self._html_content and self.page_type_code in [FRONTIER, HTML]: # če ni frontier ne smemo vračati vsebine
-            return self.pridobi_html()
         return self._html_content
     
     @html_content.setter
@@ -128,6 +117,19 @@ class Page:
     @data_type_code.setter
     def data_type_code(self, vrednost):
         self._data_type_code = vrednost
+
+    def pridobi_http_status_code(self):
+        try:
+            self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
+            response = requests.get(self.url, timeout=(3, 30))
+            return response.status_code
+        except Exception as e:
+            print(f"Napaka: http_status_code: {e}")
+            return None
+        
+    def pridobi_accessed_time(self):
+        if not self._accessed_time: # ce ga se nismo nastavili, ga nastavimo sedaj
+            return datetime.now()
     
     def pridobi_site_id(self):
         "Funkcija pridobi pripadajoči site_id domene"
@@ -135,13 +137,15 @@ class Page:
         self.baza.preveri_in_dodaj_domeno(self.url,self.vmesnik)
         return self.baza.pridobi_site(domena)[0] # vzamemo id
 
-    def pridobi_html(self):
+    def pridobi_html_content(self):
         "Funckija obisce stran ter vrne html vsebino."
         try:
             if self.http_status_code < 400:
-                self.page_type_code = HTML
                 self.preveri_dostop_in_cakaj()
-                return self.vmesnik.vrni_vsebino(self.url)
+                vsebina = self.vmesnik.vrni_vsebino(self.url)
+                self.page_type_code = HTML
+                self.accessed_time = self.pridobi_accessed_time()
+                return vsebina
             return ""
         except Exception as e:
             print(f"Napaka: pridobi_html: {e}")
@@ -191,9 +195,7 @@ class Page:
         if self.baza.tuja_domena(self.url):
             self.page_type_code = ZUNANJI
             return 
-        
-        if self.page_type_code == HTML:
-            return
+
         # drugače je frontier  
         self.page_type_code = FRONTIER
 
@@ -233,30 +235,28 @@ class Page:
             self.dodaj_v_bazo()
 
     def posodobi_v_bazi(self):
+        self.http_status_code = self.pridobi_http_status_code()
+        self.html_content = self.pridobi_html_content()
         id = self.baza.posodobi_page(self.site_id, 
                                         self.page_type_code,
                                         self.url,
                                         self.html_content,
                                         self.http_status_code,
                                         self.accessed_time)
-        # if self.page_type_code == BINARY:
-        #     self.baza.dodaj_page_data_v_bazo(id,
-        #                                      self.page_type_code,
-        #                                      self.data)
             
     def dodaj_v_bazo(self):
         self.page_id = self.baza.dodaj_page_v_bazo(self.site_id, 
                                                     self.page_type_code,
                                                     self.url,
-                                                    None,
-                                                    None,
-                                                    None)
+                                                    self.html_content,
+                                                    self.http_status_code,
+                                                    self.accessed_time)
         
         if self.je_binary():
             # lahko je slika ali dokument
             if not self.filename:
                 self.baza.dodaj_page_data_v_bazo(self.page_id,
-                                                 self.page_type_code,
+                                                 self.data_type_code,
                                                  self.data)
             else:
                 self.baza.dodaj_image_v_bazo(self.page_id,
@@ -282,14 +282,14 @@ class Page:
             zadnji_dostop = datetime.strptime(str(zadnji_dostop_str), format)
             pretecen_cas = abs(zadnji_dostop - datetime.now())
             print(f"preveri_dostop_in_cakaj: Pretecen cas je: {pretecen_cas}")
-            # if pretecen_cas.seconds < crawl_delay:
-            #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
-            #     time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
-            #     cas += crawl_delay - pretecen_cas.seconds
-            if pretecen_cas.seconds < 1:
+            if pretecen_cas.seconds < crawl_delay:
                 print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
-                time.sleep(1) # pocakaj da bo dovoljeno
-                cas += 1
+                time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
+                cas += crawl_delay - pretecen_cas.seconds
+            # if pretecen_cas.seconds < 1:
+            #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
+            #     time.sleep(1) # pocakaj da bo dovoljeno
+            #     cas += 1
             else:
                 self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
                 return 
@@ -298,7 +298,6 @@ class Page:
         try:
             self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
             response = requests.get(self.url, timeout=(3, 30))
-            self.http_status_code = response.status_code
             return response
         except Exception as e:
             print(f"Napaka: pridobi_stran: {e}")
