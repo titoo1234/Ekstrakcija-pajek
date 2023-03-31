@@ -2,6 +2,8 @@ import time
 import requests
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone
+import os
+from robots import *
 
 HTML = "HTML"
 BINARY = "BINARY"
@@ -9,34 +11,130 @@ DUPLICATE = "DUPLICATE"
 ZUNANJI = "ZUNANJI"
 FRONTIER = "FRONTIER"
 
+FORMATI_SLIK = ['.ico', '.cur','.jpg', '.jpeg', '.jfif', '.pjpeg', '.pjp','.png','.svg','.apng','.gif']
+
 class Page:
     def __init__(self, url, vmesnik, baza):
         self.url = url
         self.vmesnik = vmesnik
         self.baza = baza
-        self.site_id = self.pridobi_site_id()
-        self.accessed_time = datetime.now()
-        self.dobljena_stran = self.pridobi_stran()
-        self.page_type_code = FRONTIER #stran smo dobili iz frontierja, zato je ob icinializaciji to zagotovo frontier
-        self.html_content = None # ob inicializaciji nastavimo html_content na prazen niz
+        self._site_id = self.pridobi_site_id()
+        self._html_content = None
+        self._accessed_time = None
+        self._http_status_code = None
+        self._filename = None
+        self._content_type = None
+        self._data_type_code = None
+        self._page_id = None
+        self._data = None
+        self.preveri_url()
 
     @property
     def http_status_code(self):
-        if self.dobljena_stran:
-            # stran obstaja
-            return self.dobljena_stran.status_code
-        print(f"\nStran: {self.url} ni bila pridobljena\n")
-        return 400 # vračamo kar 400
+        if not self._http_status_code and self.page_type_code == FRONTIER:
+            if self.dobljena_stran:
+                # stran obstaja
+                return self.dobljena_stran.status_code
+            print(f"\nStran: {self.url} ni bila pridobljena\n")
+            return 400 # vračamo kar 400
+        return self._http_status_code
+    
+    @http_status_code.setter
+    def http_status_code(self, vrednost):
+        self._http_status_code = vrednost 
+    
+    @property
+    def accessed_time(self):
+        if not self._accessed_time: # ce ga se nismo nastavili, ga nastavimo sedaj
+            return datetime.now()
+        return self._accessed_time
+    
+    @accessed_time.setter
+    def accessed_time(self, vrednost):
+        self._accessed_time = vrednost 
+
+    @property
+    def dobljena_stran(self):
+        return self.pridobi_stran()
+    
+    @property
+    def site_id(self):
+        return self._site_id
+    
+    @site_id.setter
+    def site_id(self, vrednost):
+        self._site_id = vrednost 
+    
+    @property
+    def html_content(self):
+        if not self._html_content and self.page_type_code == FRONTIER: # če ni frontier ne smemo vračati vsebine
+            return self.pridobi_html()
+        return self._html_content
+    
+    @html_content.setter
+    def html_content(self, vrednost):
+        self._html_content = vrednost 
+
+    @property
+    def page_type_code(self):
+        return self._page_type_code
+    
+    @page_type_code.setter
+    def page_type_code(self, vrednost):
+        self._page_type_code = vrednost
+
+    @property
+    def page_id(self):
+        return self._page_id
+    
+    @page_id.setter
+    def page_id(self, vrednost):
+        self._page_id = vrednost 
+
+    @property
+    def filename(self):
+        return self._filename
+    
+    @filename.setter
+    def filename(self, vrednost):
+        self._filename = vrednost 
+
+    @property
+    def content_type(self):
+        return self._content_type
+    
+    @content_type.setter
+    def content_type(self, vrednost):
+        self._content_type = vrednost
+
+    @property
+    def data(self):
+        return self._data
+    
+    @data.setter
+    def data(self, vrednost):
+        self._data = vrednost
+
+    @property
+    def data_type_code(self):
+        return self._data_type_code
+    
+    @data_type_code.setter
+    def data_type_code(self, vrednost):
+        self._data_type_code = vrednost
     
     def pridobi_site_id(self):
         "Funkcija pridobi pripadajoči site_id domene"
         domena = urlparse(self.url).netloc
+        self.baza.preveri_in_dodaj_domeno(self.url,self.vmesnik)
         return self.baza.pridobi_site(domena)[0] # vzamemo id
 
     def pridobi_html(self):
         "Funckija obisce stran ter vrne html vsebino."
         if self.http_status_code < 400:
+            print(self.http_status_code)
             self.page_type_code = HTML
+            self.preveri_dostop_in_cakaj()
             return self.vmesnik.vrni_vsebino(self.url)
         return ""
     
@@ -55,10 +153,60 @@ class Page:
             - ppt
             - pptx
         ustrezno reagira (spremeni page_type_code)"""
-        formati = self.baza.pridobi_data_type()
-        for format in formati:
+        formati_dat = self.baza.pridobi_data_type()
+        # preverimo ali je datoteka
+        for format in formati_dat:
+            format = format[0]
             if self.url.endswith(format.lower()):
                 self.page_type_code = BINARY
+                self.data = None
+                self.data_type_code = format.upper()
+                return
+        # preverimo ali je slika
+        for format in FORMATI_SLIK:
+            if self.url.endswith(format):
+                self.page_type_code = BINARY
+                self.filename = os.path.basename(self.url)
+                self.content_type = self.vrni_koncnico(self.url)
+                self.data = None
+                self.html_content = None
+                self.http_status_code = None
+                return 
+
+        #preverimo ali ima tujo domeno 
+        if self.baza.tuja_domena(self.url):
+            self.page_type_code = ZUNANJI
+            return 
+        # drugače je frontier  
+        self.page_type_code = FRONTIER
+
+    def pridobi_linke(self):
+        """
+        Metoda pridobi linke is spletne strani
+        """
+        strani = self.vmesnik.poisci_linke()
+        slike = self.vmesnik.poisci_slike()
+        linki = strani + slike
+        return [Page(link, self.vmesnik, self.baza) for link in linki]
+    
+    def je_binary(self):
+        return self.page_type_code == BINARY
+    
+    def je_frontier(self):
+        return self.page_type_code == FRONTIER
+    
+    def je_duplicat(self):
+        return self.page_type_code == DUPLICATE
+    
+    def je_html(self):
+        return self.page_type_code == HTML
+    
+    def je_zunanji(self):
+        return self.page_type_code == ZUNANJI
+
+    @staticmethod
+    def vrni_koncnico(url):
+        return url.split('.')[-1]
 
     def dodaj_ali_posodobi(self):
         page = self.baza.pridobi_page(self.url)
@@ -82,18 +230,25 @@ class Page:
                                              data)
             
     def dodaj_v_bazo(self):
-        id = self.baza.dodaj_page_v_bazo(self.site_id, 
-                                        self.page_type_code,
-                                        self.url,
-                                        self.html_content,
-                                        self.http_status_code,
-                                        self.accessed_time)
+        self.page_id = self.baza.dodaj_page_v_bazo(self.site_id, 
+                                                    self.page_type_code,
+                                                    self.url,
+                                                    self.html_content,
+                                                    self.http_status_code,
+                                                    self.accessed_time)
         
-        if self.page_type_code == BINARY:
-            data = self.pridobi_data()
-            self.baza.dodaj_page_data_v_bazo(id,
-                                             self.page_type_code,
-                                             data)
+        if self.je_binary():
+            # lahko je slika ali dokument
+            if not self.filename:
+                self.baza.dodaj_page_data_v_bazo(self.page_id,
+                                                 self.page_type_code,
+                                                 self.data)
+            else:
+                self.baza.dodaj_image_v_bazo(self.page_id,
+                                             self.filename,
+                                             self.content_type,
+                                             self.data,
+                                             self.accessed_time)
             
     def pridobi_data(self):
         # TODO - pridobi binary podatke 
@@ -105,10 +260,14 @@ class Page:
         while True:
             id, domena, robot_content, sitemap_content, crawl_delay, zadnji_dostop_str  = self.baza.pridobi_site(domena)
             zadnji_dostop = datetime.strptime(str(zadnji_dostop_str), format)
-            pretecen_cas = zadnji_dostop - datetime.now()
-            if pretecen_cas.seconds < crawl_delay:
+            pretecen_cas = abs(zadnji_dostop - datetime.now())
+            print(f"preveri_dostop_in_cakaj: Pretecen cas je: {pretecen_cas}")
+            # if pretecen_cas.seconds < crawl_delay:
+            #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
+            #     time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
+            if pretecen_cas.seconds < 0.5:
                 print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
-                time.sleep(crawl_delay - pretecen_cas) # pocakaj da bo dovoljeno
+                time.sleep(0.5) # pocakaj da bo dovoljeno
             else:
                 self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
                 return 
@@ -116,8 +275,9 @@ class Page:
     def pridobi_stran(self):
         try:
             self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
-            return requests.get(self.url, timeout=(3, 30))
+            response = requests.get(self.url, timeout=(3, 30))
+            self.http_status_code = response.status_code
+            return response
         except Exception as e:
-            print(e)
+            print(f"Napaka - pridobi_stran: {e}")
             return None
-

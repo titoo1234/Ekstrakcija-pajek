@@ -12,7 +12,7 @@ from page import *
 
 class VecNitniPajek:
 
-    def __init__(self, semenske_strani, st_pajkov, domena):
+    def __init__(self, semenske_strani, st_pajkov, domena, zacetek=True):
         self.semenske_strani = semenske_strani
         self.st_pajkov = st_pajkov
         self.domena = domena
@@ -23,18 +23,46 @@ class VecNitniPajek:
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
-        # self.robots = Robot('')
-        # Napolnimo frontier s semenskimi stranmi
-        for semenska_stran in semenske_strani: self.frontier.put(semenska_stran)
+        # Napolnimo frontier s semenskimi stranmi 
+        if zacetek:
+            self.obdelaj_semenske_strani()
+        else:
+            self.napolni_frontier_iz_baze()
+            self.napolni_preverjene_linke_iz_baze()
+    
+    def obdelaj_semenske_strani(self):
+        for url in self.semenske_strani:
+            try:
+                self.vmesnik.pojdi_na_stran(url)
+                page = Page(url, self.vmesnik, self.baza)
+                page.dodaj_v_bazo()
+                self.obdelaj_linke(page)
+            except Exception as e:
+                print(f"\n NAPAKA (obdelaj_semenske_strani) --> {url}. Izpis napake: {e}")
+                continue
+
+    def napolni_preverjene_linke_iz_baze(self):
+        """
+        Funkcija doda med obiskane strani vse url-je iz baze, ki nimajo oznake FRONTIER
+        """
+        linki = self.baza.pridobi_obiskane_strani()
+        for link in linki:
+            self.preverjeni_linki.add(link)
+
+    def napolni_frontier_iz_baze(self):
+        """
+        Funkcija v frontier doda vse url-je, ki imajo oznako FRONTIER iz baze
+        """
+        linki = self.baza.pridobi_frontier()
+        for link in linki:
+            self.frontier.put(link[0])
 
     def zazeni_pajka(self):
         """
         Ta metoda dodaja nove linke, ki jih najde v html-ju, v frontier
         """
-        i = 1
-        while i < 8:
+        while True:
             try:
-                i +=1
                 print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
                 print("\nPridobivanje URL-ja iz frontier-ja...")
                 naslednji_url = self.frontier.get(timeout=60)
@@ -59,17 +87,8 @@ class VecNitniPajek:
         """
         Metoda odpre podano stran
         """
-        # TODO POGLEDAMO V ROBOTSE DOMENE, KI SO ŽE ZAPISANI V BAZI
-        # čas = robot.čas
-        # pogledamo dovoljeni čas
-        # POGLEDAMO, KDAJ JE BILA NAZADNJE DODANA STRAN IZ TE DOMENE
-        # ČE JE ČAS OK, POTEM GA SPUSTI NAPREJ DA OBDELA STRAN SICER POČAKAJ...
-        # KO ČAS PRETEČE PONOVNO PREVERI ALI JE DOVOLJENO NA STRAN(ČAS ZANDNJE DODANE STRANI IZ DOMENE)
-        
         try:
             stran = Page(url, self.vmesnik, self.baza)
-            # stran = requests.get(url, timeout=(3, 30))
-            #TRENUTNI ČAS ZABELEŽI V BAZO PRI DOMENI
             return stran
         except requests.RequestException:
             return 
@@ -83,32 +102,6 @@ class VecNitniPajek:
             return True
         return False
         
-    def pridobi_linke(self, url):
-        """
-        Metoda pridobi vse linke na trenutni strani
-        """
-        linki = self.vmesnik.poisci_linke(url)
-
-        for link in linki:
-            link = link.get_property("href") 
-            print(link)
-            #POGLEJMO DOMENO ČE JE NI JO DODAJ
-            self.baza.preveri_in_dodaj_domeno(link,self.vmesnik)
-            #PRIDOBI NEDOVOLJENE STRANI
-            domena = urlparse(url).netloc
-            site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
-            robot = Robot(site[2]) # site[2] je ravno robots datoteka
-            nedovoljene_strani = robot.disallow
-            # KAJ JE TU MIŠLJENO?
-            if link in self.preverjeni_linki:
-                self.baza.dodaj_link_frontier(url,link,False)#TRUE -> doda samo v tabelo linkov 
-
-            if link not in self.preverjeni_linki and not self.nedovoljena_stran(link,nedovoljene_strani):
-                if not self.baza.tuja_domena(link):
-                    self.frontier.put(link)
-                self.baza.dodaj_link_frontier(url,link)#doda v bazo, tudi tujo stran
-                self.preverjeni_linki.add(link)
-
     def nedovoljena_stran(self,link,tab_ned_strani):
         for dis in tab_ned_strani:
             ujemanje = dis.replace('*','')
@@ -116,34 +109,36 @@ class VecNitniPajek:
                 return True
         return False 
     
+    def obdelaj_linke(self, stran):
+        """
+        Metoda podane linke doda v bazo
+        """
+        linki = stran.pridobi_linke()
+        for page in linki:
+            print(page.url)
+            #PRIDOBI NEDOVOLJENE STRANI
+            domena = urlparse(page.url).netloc
+            site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
+            robot = Robot(site[2]) # site[2] je ravno robots datoteka
+            nedovoljene_strani = robot.disallow
+
+            if page.url in self.preverjeni_linki:
+                self.baza.dodaj_link_frontier(stran.url,page.url,False)#false -> doda samo v tabelo linkov 
+                continue
+
+            if not self.nedovoljena_stran(page.url, nedovoljene_strani):
+                if not page.je_zunanji():
+                    self.frontier.put(page.url)
+                page.dodaj_v_bazo()
+                self.preverjeni_linki.add(page.url)    
+    
     def konec_obdelave_strani(self, stran):
         page = stran.result()
-        self.vmesnik.pojdi_na_stran(page.url)
-        # TODO - ČE STATUS_CODE != 200 JE POTREBNO VSEENO ZABELEŽITI V BAZO
-        # najprej pridobimo nedovoljene strani iz robots.txt
-        # TO NASLEDNJO VRSTICO MISLIM DA NE RABIMO....
-        # self.nedovoljene_strani.union(self.robots.vrni_nedovoljene_strani(page.url)) 
-
-        print(f"\n Pridobivanje vsebine iz strani: {page.url}...\n")
-        page.html_content = page.pridobi_html()
+        self.vmesnik.pojdi_na_stran(page.url) # vmesniku nastavimo trenutno stran (da ni ponovljenih klicev)
         je_duplikat = page.preveri_duplikat()
-        print(f"\n Konec pridobivanja vsebine iz strani: {page.url}\n")
-        print(f"\n Shranjevanje vsebine iz strani: {page.url} v bazo...\n")
-        page.dodaj_ali_posodobi()
-        # self.shrani_v_bazo(page.url,vsebina,page.status_code)
-        print(f"\n Konec shranjevanja vsebine iz strani: {page.url} v bazo...\n")
-        id_strani = self.baza.id_strani(page.url)
-
-        print(f"\n Preglejevanje duplikatov...\n")
+        page.posodobi_v_bazi()
         if not je_duplikat:
-            print(f"\n Stran: {page.url} ni duplikat!!\n")
-            print(f"\n Pridobivanje linkov iz strani: {page.url}...\n")
-            self.pridobi_linke(page.url)
-            print(f"\n Konec pridobivanja linkov iz strani: {page.url}...\n")
-            print(f"\n Shranjevanje slik iz strani: {page.url}...\n")
-            self.shrani_slike(id_strani)
-            print(f"\n Konec shranjevanja slik iz strani: {page.url}...\n")
-            # self.shrani_datoteke(vsebina)
+            self.obdelaj_linke(page)
         return
 
     def shrani_slike(self,id_strani):
@@ -161,10 +156,6 @@ class VecNitniPajek:
         Metoda pridobi html vsebino strani in jo doda v bazo
         """
         vsebina = self.vmesnik.vrni_vsebino(url)
-        # TODO - TU BI DODALI VSE PODATKE O STRANI V BAZO IN USTREZNO SPREMENILI PAGE_TYPE
-        #      - TU BI LAHKO PREVERILI TUDI DUPLIKATE
-        #self.baza.dodaj_vsebino(vsebina)
-
 
         # TODO DAJMO SI SHRANJEVAT ČE PRIDE KJE DO NAPAKE IN SICER V NEKO NOVO TABELO, DA BOMO LAHKO VEDELI
         # SHANIMO SI LINK IN PA BESEDILO NAPAKE

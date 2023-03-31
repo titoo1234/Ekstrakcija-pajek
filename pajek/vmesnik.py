@@ -23,10 +23,10 @@ class Vmesnik():
         #TREBA JIH BO OBDELAT
         return povezave
     
-    def poisci_linke(self, url):
-        # self.vmesnik.get(url)
+    def poisci_linke(self):
         povezave = self.vmesnik.find_elements(By.XPATH, "//a[@href]")
-        return povezave
+        return [povezava.get_property("href") for povezava in povezave]
+    
     def nastavi_stran(self,url):
         self.vmesnik.get(url)
 
@@ -58,7 +58,8 @@ class Vmesnik():
         self.vmesnik.get(url)
         try:
             pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-            return self.vmesnik.find_element(By.TAG_NAME, "body").text
+            vsebina = self.vmesnik.find_element(By.TAG_NAME, "body").text
+            return vsebina.replace("\'", "\"")
         except TimeoutException:
             print(f"Predolgo čakanje na stran: {url}")
             return ""

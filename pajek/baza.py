@@ -1,5 +1,6 @@
 import threading
 import psycopg2
+from psycopg2 import errors
 from selenium.webdriver.common.by import By
 import pathlib
 from selenium import webdriver
@@ -19,6 +20,20 @@ class Baza():
     def dodaj_vse_v_bazo(self, slike):
         #self.dodaj_stran()
         self.dodaj_slike(slike)
+
+    def pridobi_frontier(self):
+        cur = self.conn.cursor()
+        cur.execute("SELECT url FROM crawldb.page WHERE page_type_code = 'FRONTIER' ORDER BY id DESC")
+        frontier = cur.fetchall()
+        cur.close()
+        return frontier
+    
+    def pridobi_obiskane_strani(self):
+        cur = self.conn.cursor()
+        cur.execute("SELECT url FROM crawldb.page WHERE page_type_code <> 'FRONTIER'")
+        obiskane_strani = cur.fetchall()
+        cur.close()
+        return obiskane_strani
 
     #def dodaj_stran(self,): #site_id nevem
         #datetime.now() za accessed time?
@@ -66,7 +81,8 @@ class Baza():
     
     def dodaj_page_data_v_bazo(self, page_id, data_type_code, data):
         cur = self.conn.cursor()
-        cur.execute(f"INSERT INTO crawldb.page_data (page_id, data_type_code, data) VALUES ({page_id}, '{data_type_code}', '{data}')")
+        poizvedba = "INSERT INTO crawldb.page_data (page_id, data_type_code, data) VALUES (%s, %s, %s)"
+        cur.execute(poizvedba, (page_id, data_type_code, data))
         cur.close()
         return
 
@@ -150,7 +166,10 @@ class Baza():
         cur.execute(f"SELECT id FROM crawldb.page WHERE url = '{link2}'")
         id_link2 = cur.fetchone()[0]
         # dodamo še link1 -> link2 
-        cur.execute(f"INSERT INTO crawldb.link (from_page, to_page) VALUES ('{id_link1}', '{id_link2}')")
+        try:
+            cur.execute(f"INSERT INTO crawldb.link (from_page, to_page) VALUES ('{id_link1}', '{id_link2}')")
+        except errors.UniqueViolation:
+            print(f"Na strani: {link1} smo že naleteli na url: {link2}, zato ga ne dodajamo ponovno v bazo!")
         cur.close()
         return
     
@@ -170,14 +189,23 @@ class Baza():
 
     def posodobi_page(self, site_id, page_type_code, url, html_content, http_status_code, accessed_time):
         cur = self.conn.cursor()
-        cur.execute(f"UPDATE crawldb.page SET (site_id, page_type_code, url, html_content, http_status_code, accessed_time) = ({site_id}, '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}') WHERE url = '{url}'")
+        cur.execute(f"UPDATE crawldb.page SET (site_id, page_type_code, url, html_content, http_status_code, accessed_time) = ({site_id}, '{page_type_code}', '{url}', '{html_content}', {http_status_code}, '{accessed_time}') WHERE url = '{url}'")
         id = cur.lastrowid
         cur.close()
         return id
     
     def dodaj_page_v_bazo(self, site_id, page_type_code, url, html_content, http_status_code, accessed_time):
         cur = self.conn.cursor()
-        cur.execute(f"INSERT INTO crawldb.page (site_id, page_type_code, url, html_content, http_status_code, accessed_time) VALUES ({site_id}, '{page_type_code}', '{url}', '{html_content}', '{http_status_code}', '{accessed_time}')")
+        poizvedba = "INSERT INTO crawldb.page (site_id, page_type_code, url, html_content, http_status_code, accessed_time) VALUES (%s, %s, %s, %s, %s, %s)"
+        cur.execute(poizvedba, (site_id, page_type_code, url, html_content, http_status_code, accessed_time))
+        id = cur.lastrowid
+        cur.close()
+        return id
+    
+    def dodaj_image_v_bazo(self, page_id, filename, content_type, data, accessed_time):
+        cur = self.conn.cursor()
+        poizvedba = "INSERT INTO crawldb.image (page_id, filename, content_type, data, accessed_time) VALUES (%s, %s, %s, %s, %s)"
+        cur.execute(poizvedba, (page_id, filename, content_type, data, accessed_time))
         id = cur.lastrowid
         cur.close()
         return id

@@ -16,11 +16,11 @@ SEMENSKE_STRANI = ["http://gov.si/",
                    "http://e-uprava.gov.si/",
                    "http://e-prostor.gov.si/"]
 ST_PAJKOV = 1
-DOMENA = ".gov.si"
+DOMENA = "gov.si"
 
 
 if __name__ == '__main__':
-    pajek = VecNitniPajek(SEMENSKE_STRANI, ST_PAJKOV, DOMENA)
+    pajek = VecNitniPajek(SEMENSKE_STRANI, ST_PAJKOV, DOMENA, False)
     pajek.zazeni_pajka()
     pajek.info()
 
