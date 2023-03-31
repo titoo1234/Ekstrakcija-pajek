@@ -38,7 +38,7 @@ class VecNitniPajek:
                 page.dodaj_v_bazo()
                 self.obdelaj_linke(page)
             except Exception as e:
-                print(f"\n NAPAKA (obdelaj_semenske_strani) --> {url}. Izpis napake: {e}")
+                print(f"Napaka: obdelaj_semenske_strani: {e}")
                 continue
 
     def napolni_preverjene_linke_iz_baze(self):
@@ -63,24 +63,14 @@ class VecNitniPajek:
         """
         while True:
             try:
-                print("\nTrenutni proces: ", multiprocessing.current_process().name, '\n')
-                print("\nPridobivanje URL-ja iz frontier-ja...")
                 naslednji_url = self.frontier.get(timeout=60)
-                print(f"\nURL: {naslednji_url} je bil pridobljen iz frontier-ja.")
-                print(f"\nPreverjanje in dodajanje domene ...")
-                self.baza.preveri_in_dodaj_domeno(naslednji_url,self.vmesnik)
-                print("\nDomena je bila preverjenja oz. dodana.")
-                print(f"\nOdpiranje strani: {naslednji_url}\n")
                 pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
-
-                print(f"\nPreglejevanje strani in ekstrakcija: {naslednji_url}\n")
                 pajek.add_done_callback(self.konec_obdelave_strani)
-                print(f"\nKonec preglejevanja strani: {naslednji_url}\n")
             except Empty:
                 # v frontierju ni več linkov na razpolago
                 return
             except Exception as e:
-                print(e)
+                print(f"Napaka: zazeni_pajka: {e}")
                 continue
 
     def  obdelaj_stran(self, url):
@@ -90,17 +80,9 @@ class VecNitniPajek:
         try:
             stran = Page(url, self.vmesnik, self.baza)
             return stran
-        except requests.RequestException:
+        except requests.RequestException as e:
+            print(f"Napaka: obdelaj_stran: {e}")
             return 
-        
-    def zadosca_domeni(self, link):
-        """
-        Funkcija vrne true, če podana povezava zadošča izbrani domeni
-        """
-        povezava = urlparse(link).netloc
-        if povezava.endswith(self.domena):
-            return True
-        return False
         
     def nedovoljena_stran(self,link,tab_ned_strani):
         for dis in tab_ned_strani:
@@ -115,51 +97,41 @@ class VecNitniPajek:
         """
         linki = stran.pridobi_linke()
         for page in linki:
-            print(page.url)
-            #PRIDOBI NEDOVOLJENE STRANI
-            domena = urlparse(page.url).netloc
-            site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
-            robot = Robot(site[2]) # site[2] je ravno robots datoteka
-            nedovoljene_strani = robot.disallow
+            try:
+                print(page.url)
+                #PRIDOBI NEDOVOLJENE STRANI
+                domena = urlparse(page.url).netloc
+                site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
+                robot = Robot(site[2]) # site[2] je ravno robots datoteka
+                nedovoljene_strani = robot.disallow
 
-            if page.url in self.preverjeni_linki:
-                self.baza.dodaj_link_frontier(stran.url,page.url,False)#false -> doda samo v tabelo linkov 
+                if page.url in self.preverjeni_linki:
+                    self.baza.dodaj_link_frontier(stran.url,page.url,False)#false -> doda samo v tabelo linkov 
+                    continue
+
+                elif not self.nedovoljena_stran(page.url, nedovoljene_strani):
+                    if not page.je_zunanji():
+                        self.frontier.put(page.url)
+                    page.dodaj_v_bazo()
+                    self.preverjeni_linki.add(page.url)  
+            except Exception as e:
+                # ce pride do napake nadaljujemo na naslednji link
+                print(f"Napaka: obdelaj_link: {e}")  
                 continue
-
-            if not self.nedovoljena_stran(page.url, nedovoljene_strani):
-                if not page.je_zunanji():
-                    self.frontier.put(page.url)
-                page.dodaj_v_bazo()
-                self.preverjeni_linki.add(page.url)    
     
     def konec_obdelave_strani(self, stran):
-        page = stran.result()
-        self.vmesnik.pojdi_na_stran(page.url) # vmesniku nastavimo trenutno stran (da ni ponovljenih klicev)
-        je_duplikat = page.preveri_duplikat()
-        page.posodobi_v_bazi()
-        if not je_duplikat:
-            self.obdelaj_linke(page)
-        return
-
-    def shrani_slike(self,id_strani):
-        slike = self.vmesnik.poisci_slike()
-        self.baza.dodaj_slike(slike,id_strani)
-
-    def shrani_v_bazo(self,url,vsebina,http_status_koda):
-        '''
-            napolni podatke o strani: poišče page in ga spremeni
-        '''
-        self.baza.spremenini_obstojeci_page(url,vsebina,http_status_koda)
- 
-    def pridobi_vsebino(self, url):
-        """
-        Metoda pridobi html vsebino strani in jo doda v bazo
-        """
-        vsebina = self.vmesnik.vrni_vsebino(url)
-
-        # TODO DAJMO SI SHRANJEVAT ČE PRIDE KJE DO NAPAKE IN SICER V NEKO NOVO TABELO, DA BOMO LAHKO VEDELI
-        # SHANIMO SI LINK IN PA BESEDILO NAPAKE
-        # TA LINK MORAMO PONOVNO PREGLEDATI!!! 
+        try:
+            page = stran.result()
+            self.vmesnik.pojdi_na_stran(page.url) # vmesniku nastavimo trenutno stran (da ni ponovljenih klicev)
+            je_duplikat = page.preveri_duplikat()
+            page.posodobi_v_bazi()
+            if not je_duplikat:
+                self.obdelaj_linke(page)
+            return
+        except Exception as e:
+            # ce pride do napake, koncamo s pregledom strani in gremo na novo stran
+            print(f"Napaka: konec_obdelave_strani: {e}")
+            return
 
     def info(self):
         print('\n Pridobljeni linki: ', self.preverjeni_linki, '\n')

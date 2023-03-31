@@ -31,13 +31,18 @@ class Page:
 
     @property
     def http_status_code(self):
-        if not self._http_status_code and self.page_type_code == FRONTIER:
-            if self.dobljena_stran:
-                # stran obstaja
-                return self.dobljena_stran.status_code
-            print(f"\nStran: {self.url} ni bila pridobljena\n")
-            return 400 # vračamo kar 400
-        return self._http_status_code
+        try:
+            if not self._http_status_code and self.page_type_code == FRONTIER:
+                if self.dobljena_stran:
+                    # stran obstaja
+                    return self.dobljena_stran.status_code
+                print(f"\nStran: {self.url} ni bila pridobljena\n")
+                return None 
+            return self._http_status_code
+        except Exception as e:
+            print(f"Napaka: http_status_code: {e}")
+            # Če so bile težave pri pridobivanju spletne strani vrnemo kar None
+            return None
     
     @http_status_code.setter
     def http_status_code(self, vrednost):
@@ -131,19 +136,28 @@ class Page:
 
     def pridobi_html(self):
         "Funckija obisce stran ter vrne html vsebino."
-        if self.http_status_code < 400:
-            print(self.http_status_code)
-            self.page_type_code = HTML
-            self.preveri_dostop_in_cakaj()
-            return self.vmesnik.vrni_vsebino(self.url)
-        return ""
+        try:
+            if self.http_status_code < 400:
+                print(self.http_status_code)
+                self.page_type_code = HTML
+                self.preveri_dostop_in_cakaj()
+                return self.vmesnik.vrni_vsebino(self.url)
+            return ""
+        except Exception as e:
+            print(f"Napaka: pridobi_html: {e}")
+            return None
+
     
     def preveri_duplikat(self):
         "Funkcija v primeru, da je stran duplikat ustrezno zamenja page_type_code strani"
-        if self.baza.je_duplikat(self.html_content):
-            self.page_type_code = DUPLICATE
-            return True
-        return False
+        try:
+            if self.baza.je_duplikat(self.html_content):
+                self.page_type_code = DUPLICATE
+                return True
+            return False
+        except Exception as e:
+            print(f"Napaka: preveri_duplikat: {e}")
+            return False
     
     def preveri_url(self):
         """Funkcija pogleda url strani, in če je:
@@ -257,17 +271,24 @@ class Page:
     def preveri_dostop_in_cakaj(self):
         domena = urlparse(self.url).netloc
         format = "%Y-%m-%d %H:%M:%S.%f"
-        while True:
-            id, domena, robot_content, sitemap_content, crawl_delay, zadnji_dostop_str  = self.baza.pridobi_site(domena)
+        cas = 0
+        while cas < 60: # cakamo najvec eno minuto!!
+            try:
+                id, domena, robot_content, sitemap_content, crawl_delay, zadnji_dostop_str  = self.baza.pridobi_site(domena)
+            except Exception as e:
+                print(f"Napaka: preveri_dostop_in_cakaj: {e}")
+                return 
             zadnji_dostop = datetime.strptime(str(zadnji_dostop_str), format)
             pretecen_cas = abs(zadnji_dostop - datetime.now())
             print(f"preveri_dostop_in_cakaj: Pretecen cas je: {pretecen_cas}")
             # if pretecen_cas.seconds < crawl_delay:
             #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
             #     time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
+            #     cas += crawl_delay - pretecen_cas.seconds
             if pretecen_cas.seconds < 0.5:
                 print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
                 time.sleep(0.5) # pocakaj da bo dovoljeno
+                cas += 0.5
             else:
                 self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
                 return 
@@ -279,5 +300,5 @@ class Page:
             self.http_status_code = response.status_code
             return response
         except Exception as e:
-            print(f"Napaka - pridobi_stran: {e}")
+            print(f"Napaka: pridobi_stran: {e}")
             return None

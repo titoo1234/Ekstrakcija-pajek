@@ -20,7 +20,7 @@ DOMENA = "gov.si"
 
 
 if __name__ == '__main__':
-    pajek = VecNitniPajek(SEMENSKE_STRANI, ST_PAJKOV, DOMENA, False)
+    pajek = VecNitniPajek(SEMENSKE_STRANI, ST_PAJKOV, DOMENA)
     pajek.zazeni_pajka()
     pajek.info()
 
