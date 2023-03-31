@@ -19,6 +19,7 @@ class Page:
         self.vmesnik = vmesnik
         self.baza = baza
         self._site_id = self.pridobi_site_id()
+        self._page_type_code = None
         self._html_content = None
         self._accessed_time = None
         self._http_status_code = None
@@ -32,7 +33,7 @@ class Page:
     @property
     def http_status_code(self):
         try:
-            if not self._http_status_code and self.page_type_code == FRONTIER:
+            if not self._http_status_code and self.page_type_code in [FRONTIER, HTML]:
                 if self.dobljena_stran:
                     # stran obstaja
                     return self.dobljena_stran.status_code
@@ -72,7 +73,7 @@ class Page:
     
     @property
     def html_content(self):
-        if not self._html_content and self.page_type_code == FRONTIER: # če ni frontier ne smemo vračati vsebine
+        if not self._html_content and self.page_type_code in [FRONTIER, HTML]: # če ni frontier ne smemo vračati vsebine
             return self.pridobi_html()
         return self._html_content
     
@@ -190,6 +191,9 @@ class Page:
         if self.baza.tuja_domena(self.url):
             self.page_type_code = ZUNANJI
             return 
+        
+        if self.page_type_code == HTML:
+            return
         # drugače je frontier  
         self.page_type_code = FRONTIER
 
@@ -235,20 +239,18 @@ class Page:
                                         self.html_content,
                                         self.http_status_code,
                                         self.accessed_time)
-        
-        if self.page_type_code == BINARY:
-            data = self.pridobi_data()
-            self.baza.dodaj_page_data_v_bazo(id,
-                                             self.page_type_code,
-                                             data)
+        # if self.page_type_code == BINARY:
+        #     self.baza.dodaj_page_data_v_bazo(id,
+        #                                      self.page_type_code,
+        #                                      self.data)
             
     def dodaj_v_bazo(self):
         self.page_id = self.baza.dodaj_page_v_bazo(self.site_id, 
                                                     self.page_type_code,
                                                     self.url,
-                                                    self.html_content,
-                                                    self.http_status_code,
-                                                    self.accessed_time)
+                                                    None,
+                                                    None,
+                                                    None)
         
         if self.je_binary():
             # lahko je slika ali dokument

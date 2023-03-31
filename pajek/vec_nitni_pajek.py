@@ -37,6 +37,7 @@ class VecNitniPajek:
                 page = Page(url, self.vmesnik, self.baza)
                 page.dodaj_v_bazo()
                 self.obdelaj_linke(page)
+                page.posodobi_v_bazi()
             except Exception as e:
                 print(f"Napaka: obdelaj_semenske_strani: {e}")
                 continue
