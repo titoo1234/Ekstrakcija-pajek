@@ -213,7 +213,7 @@ class Page:
                 return True
             return False
         else:
-            return True
+            return False
 
 
     def pridobi_linke(self):
