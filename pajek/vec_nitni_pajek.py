@@ -38,6 +38,7 @@ class VecNitniPajek:
                 page.dodaj_v_bazo()
                 self.obdelaj_linke(page)
                 page.posodobi_v_bazi()
+
             except Exception as e:
                 print(f"Napaka: obdelaj_semenske_strani: {e}")
                 continue
@@ -48,7 +49,7 @@ class VecNitniPajek:
         """
         linki = self.baza.pridobi_obiskane_strani()
         for link in linki:
-            self.preverjeni_linki.add(link)
+            self.preverjeni_linki.add(link[0])
 
     def napolni_frontier_iz_baze(self):
         """
@@ -125,10 +126,11 @@ class VecNitniPajek:
             page = stran.result()
             self.vmesnik.pojdi_na_stran(page.url) # vmesniku nastavimo trenutno stran (da ni ponovljenih klicev)
             je_duplikat = page.preveri_duplikat()
-            page.posodobi_v_bazi()
-            if not je_duplikat:
+            if not je_duplikat and len(self.preverjeni_linki) < 50000:
                 self.obdelaj_linke(page)
+            page.posodobi_v_bazi()
             return
+            
         except Exception as e:
             # ce pride do napake, koncamo s pregledom strani in gremo na novo stran
             print(f"Napaka: konec_obdelave_strani: {e}")

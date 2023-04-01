@@ -15,7 +15,7 @@ SEMENSKE_STRANI = ["http://gov.si/",
                    "http://evem.gov.si/",
                    "http://e-uprava.gov.si/",
                    "http://e-prostor.gov.si/"]
-ST_PAJKOV = 1
+ST_PAJKOV = 5
 DOMENA = "gov.si"
 
 if __name__ == '__main__':

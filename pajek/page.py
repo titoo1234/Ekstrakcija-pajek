@@ -199,6 +199,23 @@ class Page:
         # drugače je frontier  
         self.page_type_code = FRONTIER
 
+    def nepravilen_url(self):
+        """
+        metoda preveri url in če nima ustrezne končnice vrne true
+        """
+        koncnica = self.vrni_koncnico(self.url)
+        if koncnica != "": 
+            # url ima koncnico - ni navaden url
+            formati_dat = self.baza.pridobi_data_type()
+            map(lambda x: x[0].lower(), formati_dat) # to naredimo, ker imamo opravka s tupli npr. ('PDF',)
+            dovoljene_koncnice = FORMATI_SLIK + formati_dat + [".html"]
+            if koncnica not in dovoljene_koncnice:
+                return True
+            return False
+        else:
+            return True
+
+
     def pridobi_linke(self):
         """
         Metoda pridobi linke is spletne strani
@@ -225,7 +242,8 @@ class Page:
 
     @staticmethod
     def vrni_koncnico(url):
-        return url.split('.')[-1]
+        tuple = os.path.splitext(url)
+        return tuple[1]
 
     def dodaj_ali_posodobi(self):
         page = self.baza.pridobi_page(self.url)
