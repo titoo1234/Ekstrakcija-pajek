@@ -101,6 +101,8 @@ class VecNitniPajek:
         for page in linki:
             try:
                 print(page.url)
+                if page.nepravilen_url():# če link nima ustrezne končnice ga izpustimo
+                    continue
                 #PRIDOBI NEDOVOLJENE STRANI
                 domena = urlparse(page.url).netloc
                 site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
