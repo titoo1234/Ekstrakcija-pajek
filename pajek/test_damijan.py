@@ -24,8 +24,9 @@ def nepravilen_url(url):
         if koncnica != "": 
             # url ima koncnico - ni navaden url
             formati_dat = ["PDF", "DOC", "DOCX", "PPT", "PPTX"]
-            map(lambda x: x[0].lower(), formati_dat) # to naredimo, ker imamo opravka s tupli npr. ('PDF',)
+            formati_dat = list(map(lambda x: "." + x.lower(), formati_dat))# to naredimo, ker imamo opravka s tupli npr. ('PDF',)
             dovoljene_koncnice = FORMATI_SLIK + formati_dat + [".html"]
+            print(dovoljene_koncnice)
             if koncnica not in dovoljene_koncnice:
                 return True
             return False
@@ -36,7 +37,7 @@ def vrni_koncnico(url):
         tuple = os.path.splitext(url)
         return tuple[1]
 
-print(nepravilen_url("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/04_vloga_NAMENSKA_RABA_0.odt"))
+print(nepravilen_url("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/04_vloga_NAMENSKA_RABA_0.pdf"))
 
 # print(page.site_id)
 # print(page.page_type_code)

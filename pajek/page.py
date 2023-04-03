@@ -207,7 +207,7 @@ class Page:
         if koncnica != "": 
             # url ima koncnico - ni navaden url
             formati_dat = self.baza.pridobi_data_type()
-            map(lambda x: x[0].lower(), formati_dat) # to naredimo, ker imamo opravka s tupli npr. ('PDF',)
+            formati_dat = list(map(lambda x: "." + x[0].lower(), formati_dat)) # to naredimo, ker imamo opravka s tupli npr. ('PDF',)
             dovoljene_koncnice = FORMATI_SLIK + formati_dat + [".html"]
             if koncnica not in dovoljene_koncnice:
                 return True
