@@ -4,7 +4,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 class RobotsFile:
     def __init__(self, url, baza, vmesnik):
-        self._url = url
+        self._url = url 
         self.baza = baza
         self.vmesnik = vmesnik
 
@@ -15,10 +15,10 @@ class RobotsFile:
             if obdelan_niz.status_code > 299:
                 return ''
             obdelan_niz = obdelan_niz.text
-            if 'html' in obdelan_niz: # preprečimo nedovoljene strani za robots datoteke
+            if "html" in obdelan_niz: # bili smo redirectani oz robots.txt ne obstaja
                 return ''
             obdelan_niz = re.sub('#.*','',obdelan_niz)
-            obdelan_niz = re.sub('\n\n','',obdelan_niz)
+            obdelan_niz = re.sub('\n\n','\n',obdelan_niz)
             obdelan_niz = re.sub('User-agent','\nUser-agent',obdelan_niz)
             obdelan_niz = re.sub('Sitemap:','\nSitemap:',obdelan_niz)
             return obdelan_niz[1:]
@@ -29,16 +29,16 @@ class RobotsFile:
     
     @property
     def url(self):
-        return self._url
+        return "http://" + urlparse(self._url).netloc + "/robots.txt"
 
     @property
     def domena(self):
         return urlparse(self.url).netloc        
     
-    @url.setter
-    def url(self, vrednost):
-        # osnovnemu url-ju dodamo končnico /robots.txt
-        self._url = self.domena + "/robots.txt" 
+    # @url.setter
+    # def url(self, vrednost):
+    #     # osnovnemu url-ju dodamo končnico /robots.txt
+    #     self._url = urlparse(vrednost).netloc + "/robots.txt" 
 
     @property
     def roboti(self):
@@ -53,15 +53,13 @@ class RobotsFile:
         """
         Zanima nas samo robots datoteka, kjer je user-agent = '*'
         """
-        pravi_robot = None
         for robot in self.roboti:
             if robot.user_agent == '*':
                 return robot
         
     @property
     def sitemap(self):  
-        razdeljena_dat = self.razdeli_robots_datoteko(self.vsebina)
-        for vrstica in razdeljena_dat:
+        for vrstica in self.vsebina.split('\n'):
             if vrstica.startswith('Sitemap'):
                 # pogledamo od 'Sitemap:' naprej in stripamo ter naredimo objekt Sitemap
                 return vrstica[8:].strip()

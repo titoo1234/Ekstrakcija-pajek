@@ -23,10 +23,19 @@ class Vmesnik():
         #TREBA JIH BO OBDELAT
         return povezave
     
-    def poisci_linke(self, url):
-        # self.vmesnik.get(url)
-        povezave = self.vmesnik.find_elements(By.XPATH, "//a[@href]")
-        return povezave
+    def poisci_linke(self):
+        pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.XPATH, "//a|//button")))
+        povezave = self.vmesnik.find_elements(By.XPATH, "//a|//button")
+        linki = []
+        for link in povezave:
+            if link.tag_name == "a":
+                linki.append(link.get_attribute("href"))
+            elif link.tag_name == "button":
+                dodaj_link = link.get_attribute("onclick")
+                if dodaj_link:
+                    linki.append(dodaj_link)
+        return linki
+    
     def nastavi_stran(self,url):
         self.vmesnik.get(url)
 
@@ -42,9 +51,16 @@ class Vmesnik():
     
     def poisci_slike(self):
         #self.vmesnik.get(povezava)
-        slike = self.vmesnik.find_elements(By.TAG_NAME, "img")
+        try:
+            pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "img")))
+            slike = self.vmesnik.find_elements(By.TAG_NAME, "img")
+        except Exception as ex:
+            #print("FBADSUIFBADIFNSADISANDIOASNDOIAS", ex)
+            slike = []
+        print('slike:',slike)
         slike = [slika.get_attribute("src") for slika in slike]
         slike = [slika for slika in slike if self.preveri_sliko(slika)]
+
         return slike
     
     def pojdi_na_stran(self, povezava):
@@ -58,7 +74,8 @@ class Vmesnik():
         self.vmesnik.get(url)
         try:
             pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-            return self.vmesnik.find_element(By.TAG_NAME, "body").text
+            vsebina = self.vmesnik.find_element(By.TAG_NAME, "body").text
+            return vsebina.replace("\'", "\"")
         except TimeoutException:
             print(f"Predolgo čakanje na stran: {url}")
             return ""
@@ -72,7 +89,7 @@ class Vmesnik():
             if link[i:(i+dolzina_domene)] == domena:
                 j = i + dolzina_domene
         robot_link = link+'/robots.txt'
-        print(robot_link)
+        # print(robot_link)
         # link[:j] + "/robots.txt"
         self.vmesnik.get(robot_link)
         html_robot = self.vmesnik.page_source
