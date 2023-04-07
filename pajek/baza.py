@@ -1,4 +1,3 @@
-import threading
 import psycopg2
 from psycopg2 import errors
 from selenium.webdriver.common.by import By
@@ -8,7 +7,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 import time
 from urllib.parse import urlparse, urljoin
-from frontier import Frontier
 from robots import Robot,RobotsFile
 import os
 from datetime import datetime, timezone
@@ -18,7 +16,6 @@ class Baza():
         self.conn.autocommit = True
 
     def dodaj_vse_v_bazo(self, slike):
-        #self.dodaj_stran()
         self.dodaj_slike(slike)
 
     def pridobi_frontier(self):
@@ -90,7 +87,6 @@ class Baza():
         for slika in slike:
             koncnica = slika.split('.')[-1]
             filename = os.path.basename(slika)
-            # ZAENKRAT NE DODAJAMO DATA!!!
             poizvedba = "Insert into crawldb.image (page_id,filename,content_type,accessed_time) values (%s,%s,%s,%s)"
             cur.execute(poizvedba, (link_id, filename, koncnica, datetime.now()))
         cur.close()
@@ -118,12 +114,10 @@ class Baza():
         '''
             doda link v bazo z lastnostjo FRONTIER, doda se tudi v tabelo link1 -> link2 
         '''
-        # NE BO TREBA PREVERJAT KER SMO ŽE PREJ ZAGOTOVILI DA JE DOMENA V BAZI!!!
         # preverimo ali je že domena od linka2 v bazi:
         cur = self.conn.cursor()
         if nepreskoci:
             id = self.poglej_domeno(link2)[0]
-            # print('dodan link v bazo:',link2,'\n')
             if self.tuja_domena(link2):
                 poizvedba = "INSERT INTO crawldb.page (site_id, page_type_code, url) VALUES (%s, 'ZUNANJA', %s)"
                 cur.execute(poizvedba, (id, link2))

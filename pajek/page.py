@@ -120,7 +120,7 @@ class Page:
 
     def pridobi_http_status_code(self):
         try:
-            # self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
+            self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
             response = requests.get(self.url, timeout=(3, 30))
             return response.status_code
         except Exception as e:
@@ -140,7 +140,6 @@ class Page:
     def pridobi_html_content(self):
         "Funckija obisce stran ter vrne html vsebino."
         try:
-            
             if self.http_status_code and self.http_status_code < 400:
                 self.preveri_dostop_in_cakaj()
                 vsebina = self.vmesnik.vrni_vsebino(self.url)
@@ -260,10 +259,6 @@ class Page:
             self.dodaj_v_bazo()
 
     def posodobi_v_bazi(self):
-        #self.http_status_code = code
-        # self.http_status_code = self.pridobi_http_status_code()
-        # self.html_content = self.pridobi_html_content()
-        #self.html_content = html_content
         id = self.baza.posodobi_page(self.site_id, 
                                         self.page_type_code,
                                         self.url,
@@ -293,14 +288,12 @@ class Page:
                                              self.accessed_time)
             
     def pridobi_data(self):
-        # TODO - pridobi binary podatke 
         return ""
     
     def preveri_dostop_in_cakaj(self):
         domena = urlparse(self.url).netloc
         format = "%Y-%m-%d %H:%M:%S.%f"
         cas = 0
-        print('Cakam stran:',self.url,'\n')
         while cas < 60: # cakamo najvec eno minuto!!
             try:
                 id, domena, robot_content, sitemap_content, crawl_delay, zadnji_dostop_str  = self.baza.pridobi_site(domena)
@@ -309,23 +302,16 @@ class Page:
                 return 
             zadnji_dostop = datetime.strptime(str(zadnji_dostop_str), format)
             pretecen_cas = abs(zadnji_dostop - datetime.now())
-            # print(f"preveri_dostop_in_cakaj: Pretecen cas je: {pretecen_cas}")
             if pretecen_cas.seconds < crawl_delay:
-                # print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
                 time.sleep(crawl_delay - pretecen_cas.seconds) # pocakaj da bo dovoljeno
                 cas += crawl_delay - pretecen_cas.seconds
-            # if pretecen_cas.seconds < 1:
-            #     print(f"\n Čakamo, da bo dovoljeno dostopati do strani: {self.url}")
-            #     time.sleep(1) # pocakaj da bo dovoljeno
-            #     cas += 1
             else:
                 self.baza.spremeni_cas_domene(id) # nastavimo nov čas zadnjega dostopa
-                print('Grem na stran:',self.url,'\n')
                 return 
 
     def pridobi_stran(self):
         try:
-            # self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
+            self.preveri_dostop_in_cakaj() # preverimo robots in po potrebi cakamo
             response = requests.get(self.url, timeout=(3, 30))
             return response
         except Exception as e:
@@ -337,15 +323,9 @@ class Page:
         scheme = parsed_url.scheme.lower()
         netloc = parsed_url.netloc.lower()
         path = parsed_url.path
-        # print(type(path))
-        # print(path)
-        # Remove any trailing slashes from the path
         if isinstance(path,bytes):
             return url
-        
         while path.endswith('/'):
             path = path[:-1]
-
-        # Reconstruct the URL with the canonicalized components
         canonical_url = urlunparse((scheme, netloc, path, '', '', ''))
         return canonical_url

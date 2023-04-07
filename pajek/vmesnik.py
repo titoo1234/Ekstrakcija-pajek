@@ -1,4 +1,3 @@
-import threading
 import psycopg2
 from selenium.webdriver.common.by import By
 import pathlib
@@ -18,9 +17,7 @@ class Vmesnik():
         self.vmesnik = webdriver.Chrome(WEB_DRIVER_LOCATION, options=lastnosti)
 
     def poisci_povezave(self):
-        #self.vmesnik.get(povezava)
         povezave = self.vmesnik.find_elements(By.TAG_NAME, "a")
-        #TREBA JIH BO OBDELAT
         return povezave
     
     def poisci_linke(self):
@@ -50,14 +47,11 @@ class Vmesnik():
         return False
     
     def poisci_slike(self):
-        #self.vmesnik.get(povezava)
         try:
             pocakaj = WebDriverWait(self.vmesnik, 3).until(EC.presence_of_element_located((By.TAG_NAME, "img")))
             slike = self.vmesnik.find_elements(By.TAG_NAME, "img")
         except Exception as ex:
-            #print("FBADSUIFBADIFNSADISANDIOASNDOIAS", ex)
             slike = []
-        print('slike:',slike)
         slike = [slika.get_attribute("src") for slika in slike]
         slike = [slika for slika in slike if self.preveri_sliko(slika)]
 
@@ -79,33 +73,3 @@ class Vmesnik():
         except TimeoutException:
             print(f"Predolgo čakanje na stran: {url}")
             return ""
-        
-
-    def robot(self, link, domena):
-        #self.vmesnik.get(link + "/robots.txt")
-        self.vmesnik.get(link)
-        dolzina_domene = len(domena)
-        for i in range(len(link)):#komentar??!!??
-            if link[i:(i+dolzina_domene)] == domena:
-                j = i + dolzina_domene
-        robot_link = link+'/robots.txt'
-        # print(robot_link)
-        # link[:j] + "/robots.txt"
-        self.vmesnik.get(robot_link)
-        html_robot = self.vmesnik.page_source
-        
-        #izberi tistega kjer je sitemap
-
-        if "Not Found" in html_robot:
-            return "", ""
-        #iz html robot je treba vn pobrat še sitemap
-        try:
-            sitemap = html_robot.split("Sitemap:")[1].split("\n")[0].strip()
-        except :
-            sitemap = 'ninaslo'
-        print("Sitemap:" + sitemap)
-        return html_robot, sitemap # UPAM DA JE PRAVI FORMAT
-
-    def poisci_nedovoljene(self):
-        #TREBA JE ODPRET link/robots.txt in pogledat vrstice ki se začenjo z "Disallow:" in te linke je treba ignorirat i guess
-        return # NEKI SM NAREDO V BAZA.PY nevem a je to potrebno

@@ -1,14 +1,3 @@
-import threading
-import psycopg2
-from selenium.webdriver.common.by import By
-import pathlib
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.options import Options
-from frontier import Frontier
-#import funkcije
-from vmesnik import Vmesnik
-from baza import Baza
 from vec_nitni_pajek import VecNitniPajek
 
 SEMENSKE_STRANI = ["http://gov.si/",

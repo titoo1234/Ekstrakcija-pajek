@@ -1,5 +1,4 @@
 import multiprocessing
-from bs4 import BeautifulSoup
 from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse
@@ -19,7 +18,6 @@ class VecNitniPajek:
         self.pool = ThreadPoolExecutor(max_workers=self.st_pajkov)
         self.preverjeni_linki = set()
         self.nedovoljene_strani = set() # tukaj se hranijo strani ki zaradi robots.txt niso dovoljene
-                                        # TODO: dodaj strani ki so ze v bazi
         self.frontier = Queue()
         self.vmesnik = Vmesnik()
         self.baza = Baza()
@@ -69,7 +67,6 @@ class VecNitniPajek:
             try:
                 naslednji_url = self.frontier.get(timeout=60)
                 pajek = self.pool.submit(self.obdelaj_stran, naslednji_url)
-                #if "arhiv" in self.page.url: raise Exception("arhivcek")
                 pajek.add_done_callback(self.konec_obdelave_strani)
             except Empty:
                 # v frontierju ni več linkov na razpolago
@@ -104,13 +101,12 @@ class VecNitniPajek:
         dodani = set()
         linki = stran.pridobi_linke()
         for page in linki:
-            # print(page.url)
             try:
                 if page.nepravilen_url():# če link nima ustrezne končnice ga izpustimo
                     continue
                 #PRIDOBI NEDOVOLJENE STRANI
                 domena = urlparse(page.url).netloc
-                site = self.baza.pridobi_site(domena) # to bi naredil drugače !!!
+                site = self.baza.pridobi_site(domena)
                 try:
                     robot = Robot(site[2]) # site[2] je ravno robots datoteka
                     nedovoljene_strani = robot.disallow
@@ -120,9 +116,7 @@ class VecNitniPajek:
                 if page.url in self.preverjeni_linki and page.url not in dodani:
                     dodani.add(page.url)
                     self.baza.dodaj_link_frontier(stran.url,page.url,False)#false -> doda samo v tabelo linkov 
-                    
                     continue
-
                 elif not self.nedovoljena_stran(page.url, nedovoljene_strani) and page.url not in dodani:
                     dodani.add(page.url)
                     if not page.je_zunanji():
@@ -145,7 +139,7 @@ class VecNitniPajek:
             page.html_content = page.pridobi_html_content()
             
             je_duplikat = page.preveri_duplikat()
-            if not je_duplikat:# and len(self.preverjeni_linki) < 60000:
+            if not je_duplikat:
                 self.obdelaj_linke(page)
             page.posodobi_v_bazi()
             return

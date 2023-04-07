@@ -1,7 +1,7 @@
 import re
 import requests
 from urllib.parse import urljoin, urlparse
-from bs4 import BeautifulSoup
+
 class RobotsFile:
     def __init__(self, url, baza, vmesnik):
         self._url = url 
@@ -26,7 +26,6 @@ class RobotsFile:
             print(e)
             return ''
         
-    
     @property
     def url(self):
         return "http://" + urlparse(self._url).netloc + "/robots.txt"
@@ -35,11 +34,6 @@ class RobotsFile:
     def domena(self):
         return urlparse(self.url).netloc        
     
-    # @url.setter
-    # def url(self, vrednost):
-    #     # osnovnemu url-ju dodamo končnico /robots.txt
-    #     self._url = urlparse(vrednost).netloc + "/robots.txt" 
-
     @property
     def roboti(self):
         if not self.vsebina:
@@ -73,8 +67,7 @@ class RobotsFile:
         """
         return niz.split('\n\n')
     
-    def zadosca_robots_datoteki(self, link): #KA JE TO? 
-        # TODO dodaj omejitve!!!
+    def zadosca_robots_datoteki(self, link):
         return True
     
     def vrni_nedovoljene_strani(self, url):
@@ -83,15 +76,7 @@ class RobotsFile:
         in vrne vse nedovoljene strani.
         """
         nedovoljene_strani = set([])
-        # TODO - poišči url/robots.txt in dodaj strani ki so pod "disallowed"
         return nedovoljene_strani
-
-    # TODO - ustvari metode za ostale omejitve glede robots.txt datotek
-    # - disallow
-    # - allow
-    # - user-agent
-    # - crawl-delay
-    # - sitmap
 
 class Robot:
     def __init__(self, robots_dat):
