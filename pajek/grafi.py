@@ -11,6 +11,32 @@ def baza():
 
 conn = baza()
 
+def dobi_page_type():
+    '''
+        pridobi iz tabele page stevilo strani ki so vrste HTML, BINARY, DUPLICATE...
+    '''
+    cur = conn.cursor()
+    cur.execute("select count(*), page_type_code from crawldb.page group by page_type_code")
+    return cur.fetchall()
+
+
+def dobi_content_type():
+    '''
+        pridobi iz tabele page stevilo strani ki so vrste HTML, BINARY, DUPLICATE...
+    '''
+    cur = conn.cursor()
+    cur.execute("select count(*),content_type from crawldb.image group by content_type order by count(*) desc;")
+    return cur.fetchall()
+
+
+def dobi_page_data():
+    '''
+        pridobi iz tabele page stevilo strani ki so vrste HTML, BINARY, DUPLICATE...
+    '''
+    cur = conn.cursor()
+    cur.execute("select count(*),data_type_code from crawldb.page_data group by data_type_code order by count(*) desc;")
+    return cur.fetchall()
+
 def dobi_linke_otlinki():
     '''
         za linke z največ outlinki
@@ -39,7 +65,7 @@ def dobi_linke_inlinki():
                 SELECT to_page
                 FROM crawldb.link
                 GROUP BY to_page
-                HAVING COUNT(*) > 1000
+                HAVING COUNT(*) = 2
             );""")
     return cur.fetchall()
 def dobi_linke():
@@ -143,5 +169,6 @@ def pita(vr,labels):
 # vr = dobi_page_data()
 # vr = uredi(vr)
 # pita(vr[0], vr[1])
+    
     
     
