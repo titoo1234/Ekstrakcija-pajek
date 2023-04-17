@@ -2,10 +2,10 @@ from parsel import Selector
 from extraction_xpath import *
 import json
 
-html = odpri_datoteko("/Users/damijanrandl/Downloads/WebPages/overstock.com/jewelry02.html")
-htmls = []
-htmls.append(html)
-print(json.dumps(overstock(htmls), indent=4))
+# html = odpri_datoteko("/Users/damijanrandl/Downloads/WebPages/overstock.com/jewelry02.html")
+# htmls = []
+# htmls.append(html)
+# print(json.dumps(overstock(htmls), indent=4))
 
 # html = odpri_datoteko("/Users/damijanrandl/Downloads/WebPages/rtvslo.si/Volvo XC 40 D4 AWD momentum_ suvereno med najboljše v razredu - RTVSLO.si.html")
 # htmls = []
@@ -41,3 +41,23 @@ print(json.dumps(overstock(htmls), indent=4))
 # Content: '//*[@id="main-container"]/div[3]/div/div[2]/article' tu nevem a potrebujemo tudi slike
 # Author: '//*[@id="main-container"]/div[3]/div/div[1]/div[1]/div/text()'
 # PublishedTime: '//*[@id="main-container"]/div[3]/div/div[1]/div[2]/text()[1]' treba je se strip()-at
+
+# IMDB:
+# ==============================================================================
+# with open("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/pa2/input-extraction/WebPages/imdb.com/imdb1.html", encoding="utf-8") as dat:
+#     text = dat.read()
+# sel = Selector(text)
+# print(sel.xpath('//*[@id="main"]/div/div[3]/div/div/div[3]/p[2]/text()').getall())
+
+html = odpri_datoteko("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/pa2/input-extraction/WebPages/imdb.com/imdb1.html")
+htmls = []
+htmls.append(html)
+print(json.dumps(imdb(htmls), indent=4, ensure_ascii=False))
+
+# XPATHS imdb:
+# Title:  '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/a/text()'
+# Year: '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/span[2]/text()'
+# Runtime: '//*[@id="main"]/div/div[3]/div/div/div[3]/p[1]/span[@class="runtime"]/text()'
+# Genre: '//*[@id="main"]/div/div[3]/div/div/div[3]/p[1]/span[@class="genre"]/text()'
+# Rating: '//*[@id="main"]/div/div[3]/div/div/div[3]/div/div[1]/strong/text()'
+# Content: '//*[@id="main"]/div/div[3]/div/div/div[3]/p[2]/text()'

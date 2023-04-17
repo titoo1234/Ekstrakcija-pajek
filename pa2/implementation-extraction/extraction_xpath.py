@@ -6,10 +6,14 @@ def odpri_datoteko(datoteka):
     try:
         with open(datoteka, encoding="utf-8") as dat:
             text = dat.read()
-    except:
+    except Exception as e:
+        print(e)
         with open(datoteka, encoding="windows-1252") as dat:
             text = dat.read()
     return text
+
+# RTVSLO
+# ================================================================
 
 def rtv_slo(htmls):
     """
@@ -55,6 +59,9 @@ def pocisti_publishedTime_rtvslo(niz):
     niz = re.sub("\n", " ", niz)
     niz = re.sub("\t", " ", niz)
     return niz
+
+# OVERSTOCK
+# ================================================================
 
 def overstock(htmls):
     """ 
@@ -116,4 +123,83 @@ def pocisti_saving_overstock(niz):
     """ Funkcija iz niza kjer nastopata tako saving kot savinPercent izlusci saving"""
     tab = re.split("\s", niz)
     niz = tab[0]
+    return niz
+
+# IMDB
+# ================================================================
+
+def imdb(htmls):
+    """ 
+    Metoda iz podanih html textov prebere podatke:
+     - Title
+     - Year
+     - Runtime
+     - Genre
+     - Rating
+     - Content
+    ter vrne slovar kjer so zgoraj nasteta poglavja kljuci slovarja
+    """
+    slovar = {}
+    xpaths_slovar = {'Title': '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/a/text()',
+                     'Year': '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/span[2]/text()',
+                     'Runtime': '//*[@id="main"]/div/div[3]/div/div/div[3]/p[1]/span[@class="runtime"]/text()',
+                     'Genre': '//*[@id="main"]/div/div[3]/div/div/div[3]/p[1]/span[@class="genre"]/text()',
+                     'Rating': '//*[@id="main"]/div/div[3]/div/div/div[3]/div/div[1]/strong/text()',
+                     'Content': '//*[@id="main"]/div/div[3]/div/div/div[3]/p[2]'}
+    for html in htmls:
+        sel = Selector(html)
+        for kljuc, vrednost in xpaths_slovar.items():
+            tab_vrednosti = sel.xpath(vrednost).getall()
+            for item_st in range(len(tab_vrednosti)):
+                item = "movie " + str(item_st+1) # kljuc po katerem bomo locevali izdelke
+                if item in slovar:
+                    if kljuc == 'Title':
+                        slovar[item][kljuc] = pocisti_title_imdb(tab_vrednosti[item_st]) 
+                    elif kljuc == 'Year':
+                        slovar[item][kljuc] = pocisti_year_imdb(tab_vrednosti[item_st]) 
+                    elif kljuc == 'Runtime':
+                        slovar[item][kljuc] = pocisti_runtime_imdb(tab_vrednosti[item_st]) 
+                    elif kljuc == 'Genre':
+                        slovar[item][kljuc] = pocisti_genre_imdb(tab_vrednosti[item_st]) 
+                    elif kljuc == 'Rating':
+                        slovar[item][kljuc] = pocisti_raiting_imdb(tab_vrednosti[item_st])
+                    elif kljuc == 'Content':
+                        slovar[item][kljuc] = pocisti_content_imdb(tab_vrednosti[item_st])
+                else:
+                    slovar[item] = {}
+                    slovar[item][kljuc] = tab_vrednosti[item_st]
+    return slovar
+
+def pocisti_title_imdb(niz):
+    """ Funkcija izlusci title"""
+    return niz
+
+def pocisti_year_imdb(niz):
+    """ Funkcija odstrani oklepaj in zaklepaj nizu"""
+    niz = re.sub("\(", "", niz)
+    niz = re.sub("\)", "", niz)
+    return niz
+
+def pocisti_runtime_imdb(niz):
+    """ Funkcija izlusci runtime"""
+    return niz
+
+def pocisti_genre_imdb(niz):
+    """ Funkcija odstrani prehode v novo vrstico ter prazne nize"""
+    niz = re.sub("\n", "", niz)
+    niz = re.sub(" ", "", niz)
+    return niz
+
+def pocisti_raiting_imdb(niz):
+    """ Funkcija pocisti raiting"""
+    return niz
+
+def pocisti_content_imdb(niz):
+    """ Funkcija iz content-a pocisti znake \\n in \\t"""
+    niz = re.sub("\n", "", niz)
+    niz = re.sub("\t", " ", niz)
+    niz = re.sub(r"<p(.*?)>", "", niz)
+    niz = re.sub(r"</p>", "", niz)
+    niz = re.sub(r"<a(.*?)>", "", niz)
+    niz = re.sub(r"</a>", "", niz)
     return niz
