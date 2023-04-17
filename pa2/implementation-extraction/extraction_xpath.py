@@ -172,6 +172,7 @@ def imdb(htmls):
 
 def pocisti_title_imdb(niz):
     """ Funkcija izlusci title"""
+    # zaenkrat ne naredimo ničesar
     return niz
 
 def pocisti_year_imdb(niz):
@@ -182,6 +183,7 @@ def pocisti_year_imdb(niz):
 
 def pocisti_runtime_imdb(niz):
     """ Funkcija izlusci runtime"""
+    # zaenkrat ne naredimo ničesar
     return niz
 
 def pocisti_genre_imdb(niz):
@@ -192,14 +194,18 @@ def pocisti_genre_imdb(niz):
 
 def pocisti_raiting_imdb(niz):
     """ Funkcija pocisti raiting"""
+    # zaenkrat ne naredimo ničesar
     return niz
 
 def pocisti_content_imdb(niz):
     """ Funkcija iz content-a pocisti znake \\n in \\t"""
     niz = re.sub("\n", "", niz)
     niz = re.sub("\t", " ", niz)
+    # odstraniti je potrebmo značke <p ...></p>
     niz = re.sub(r"<p(.*?)>", "", niz)
     niz = re.sub(r"</p>", "", niz)
+    # če content slučajno vsebuje tudi kakšne hiperpovezave odstranimo
+    # tudi značke tipa <a href="..."></a>
     niz = re.sub(r"<a(.*?)>", "", niz)
     niz = re.sub(r"</a>", "", niz)
     return niz
