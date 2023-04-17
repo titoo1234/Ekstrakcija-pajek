@@ -8,7 +8,8 @@ def odpri_datoteko(datoteka):
             text = dat.read()
     except Exception as e:
         print(e)
-        with open(datoteka, encoding="windows-1252") as dat:
+        with open(datoteka, encoding="windows-1252",errors='ignore') as dat:
+            print('asd')
             text = dat.read()
     return text
 
@@ -189,7 +190,7 @@ def pocisti_runtime_imdb(niz):
 def pocisti_genre_imdb(niz):
     """ Funkcija odstrani prehode v novo vrstico ter prazne nize"""
     niz = re.sub("\n", "", niz)
-    niz = re.sub(" ", "", niz)
+    niz = re.sub("  ", "", niz)
     return niz
 
 def pocisti_raiting_imdb(niz):

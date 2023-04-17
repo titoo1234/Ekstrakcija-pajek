@@ -25,7 +25,7 @@ def rtv_slo(html):
     slovar['author'] = author
     # print(author)
 
-    publishedTime_pattern = r"<\/strong>\|\s+(.*)\s*<\/div>\s*<div class=\"place-source\">"
+    publishedTime_pattern = r"<\/strong>\|\s+(.*?)\s*<\/div>\s*<div class=\"place-source\">"
     match = re.compile(publishedTime_pattern).search(html)
     publishedTime = match.group(1)
     slovar['publishedTime'] = publishedTime
@@ -37,12 +37,20 @@ def rtv_slo(html):
     slovar['lead'] = lead
     # print(lead)
 
-    content_pattern = r"<p class=\"Body\">([\s\S]+?)<\/p>"
+
+    content_pattern = r'<article(?:\s*<p>(.*?)<\/p>\s*)+<\/article>(?=[^<]*(?:<|$))'
     # content_pattern = r"(?:(?<=^)|(?<=\W))<article(.*?)(<p.*?>(.+?)<\/p.*?>)+?(.*?)(?=<\/article>)(?:(?=\W)|(?=$))"
-    contents = re.finditer(content_pattern, html)
+    #contents = re.finditer(content_pattern, html)
+    contents = re.findall(content_pattern, html)
+    print(contents)
     all_content = ''    
+    i = 0
     for content in contents:
+        i+=1
         all_content += content.group(1)
+        print(content.group(1))
+    print(i)
+    all_content = '' 
     slovar['content'] = all_content
 
     return slovar
@@ -95,7 +103,7 @@ def imdb(html):
     title = r'<a href=\"\/title[^>]*>(.*?)<\/a>'
     year = r'[^<]*<span class="lister-item-year text-muted unbold">\((.*)\)</span>'
     runtime = r'[\s\S]+?<span class="runtime">(.+)</span>'
-    genre = r'[\s\S]+?<span class="genre">[^A-Z]*(.+?)</span>'
+    genre = r'[\s\S]+?<span class="genre">[^A-Z]*(.+?)\s{2}'
     rating = r'[\s\S]+?<div class="inline-block ratings-imdb-rating" name="ir" data-value="([^>]*?)">'
     content = r'[\s\S]+?<p class="text-muted">[^A-Z]*?\s*([\s\S]*?)</p>'
     slovar =dict()
@@ -117,7 +125,7 @@ def imdb(html):
         item['genre'] = genre
         item['rating'] = rating
         item['content'] = content
-        slovar['item ' + str(counter) ] = item
+        slovar['movie ' + str(counter) ] = item
         counter += 1
         item = dict()
     print(counter)
@@ -140,8 +148,17 @@ if __name__ == '__main__':
     #     pageContent = file.read()
     # rtv_slo(pageContent)
 
-    pageContent = codecs.open(path_imdb2, 'r', encoding='utf-8', errors='ignore').read()
-    json_object = json.dumps(imdb(pageContent), indent = 4) 
+    pageContent = codecs.open(path_imdb1, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(imdb(pageContent), indent = 4,ensure_ascii=False) 
     # rtv_slo(pageContent)
     print(json_object)
+
+
+# RTV TEST=======================
+
+    # pageContent = codecs.open(path, 'r', encoding='utf-8', errors='ignore').read()
+    # json_object = json.dumps(rtv_slo(pageContent), indent = 4) 
+    # # rtv_slo(pageContent)
+    # print(json_object)
+
 
