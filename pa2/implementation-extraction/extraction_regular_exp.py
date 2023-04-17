@@ -89,27 +89,34 @@ def overstock(html):
         slovar['item ' + str(counter) ] = item
         counter += 1
         item = dict()
-        
-    
     return slovar
 
 def imdb(html):
-    title = r"<span class=\"a-size-base-plus a-color-base a-text-normal\">(.+)<\/span> <\/a> <\/h2>"
-
-    drugo = r"<span class=\"a-color-information a-text-bold\">(.*)<\/span><\/div><\/div>"
-    
-    slovar = dict()
+    title = r'<a href=\"\/title[^>]*>(.*?)<\/a>'
+    year = r'[^<]*<span class="lister-item-year text-muted unbold">\((.*)\)</span>'
+    runtime = r'[\s\S]+?<span class="runtime">(.+)</span>'
+    genre = r'[\s\S]+?<span class="genre">[^A-Z]*(.+?)</span>'
+    rating = r'[\s\S]+?<div class="inline-block ratings-imdb-rating" name="ir" data-value="([^>]*?)">'
+    content = r'[\s\S]+?<p class="text-muted">[^A-Z]*?\s*([\s\S]*?)</p>'
+    slovar =dict()
     counter = 1
-
-
-    regex = title
+    regex = title + year + runtime + genre+ rating +content
     matches = re.finditer(regex, html)
     # print(len(matches))
     item = dict()
     for match in matches:
         title = match.group(1)
-        # print(title)
+        year = match.group(2)
+        runtime = match.group(3)
+        genre = match.group(4)
+        rating = match.group(5)
+        content = match.group(6)
         item['title'] = title
+        item['year'] = year
+        item['runtime'] = runtime
+        item['genre'] = genre
+        item['rating'] = rating
+        item['content'] = content
         slovar['item ' + str(counter) ] = item
         counter += 1
         item = dict()
