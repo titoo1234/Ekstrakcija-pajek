@@ -93,20 +93,47 @@ def overstock(html):
     
     return slovar
 
+def imdb(html):
+    title = r"<span class=\"a-size-base-plus a-color-base a-text-normal\">(.+)<\/span> <\/a> <\/h2>"
+
+    drugo = r"<span class=\"a-color-information a-text-bold\">(.*)<\/span><\/div><\/div>"
+    
+    slovar = dict()
+    counter = 1
+
+
+    regex = title
+    matches = re.finditer(regex, html)
+    # print(len(matches))
+    item = dict()
+    for match in matches:
+        title = match.group(1)
+        # print(title)
+        item['title'] = title
+        slovar['item ' + str(counter) ] = item
+        counter += 1
+        item = dict()
+    print(counter)
+    return slovar
+
+
+
 
 if __name__ == '__main__':
     path1 = '../input-extraction/WebPages/overstock.com/jewelry01.html'
     path1 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry01.html'
     path2 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry02.html'
     htmls = [path1,path2]
-    path = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\rtvslo.si\Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    path =        r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\rtvslo.si\Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    path_amazon = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\imdb.com\imdb1.html'
+    
     # path = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry01.html'
     # with open(path, 'r',encoding='utf-8') as file:
     #     pageContent = file.read()
     # rtv_slo(pageContent)
 
-    pageContent = codecs.open(path, 'r', encoding='utf-8', errors='ignore').read()
-    json_object = json.dumps(rtv_slo(pageContent), indent = 4) 
+    pageContent = codecs.open(path_amazon, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(imdb(pageContent), indent = 4) 
     # rtv_slo(pageContent)
     print(json_object)
 
