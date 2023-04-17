@@ -49,7 +49,7 @@ import json
 # sel = Selector(text)
 # print(sel.xpath('//*[@id="main"]/div/div[3]/div/div/div[3]/p[2]/text()').getall())
 
-html = odpri_datoteko("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/pa2/input-extraction/WebPages/imdb.com/imdb1.html")
+html = odpri_datoteko("/Users/damijanrandl/Desktop/ISRM/letnik_1/IEPS/projekt/Ekstrakcija-pajek/pa2/input-extraction/WebPages/imdb.com/imdb2.html")
 htmls = []
 htmls.append(html)
 print(json.dumps(imdb(htmls), indent=4, ensure_ascii=False))
