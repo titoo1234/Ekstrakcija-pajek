@@ -42,10 +42,10 @@ import json
 # ==============================================================================
 # TEST - RTVSLO1
 # -------------------
-# html = odpri_datoteko("/Users/damijanrandl/Downloads/WebPages/rtvslo.si/Volvo XC 40 D4 AWD momentum_ suvereno med najboljše v razredu - RTVSLO.si.html")
-# htmls = []
-# htmls.append(html)
-# print(json.dumps(rtv_slo(htmls), indent=4, ensure_ascii=False))
+html = odpri_datoteko("/Users/damijanrandl/Downloads/WebPages/rtvslo.si/Volvo XC 40 D4 AWD momentum_ suvereno med najboljše v razredu - RTVSLO.si.html")
+htmls = []
+htmls.append(html)
+print(json.dumps(rtv_slo(htmls), indent=4, ensure_ascii=False))
 
 # TEST - XPATH-OV
 # -------------------
