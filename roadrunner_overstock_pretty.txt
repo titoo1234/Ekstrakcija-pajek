@@ -1,0 +1,523 @@
+<html>
+ <body>
+  <table>
+   <tbody>
+    <tr>
+     <td>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <table>
+           <tbody>
+            <tr>
+             <td>
+              <span>
+               Search:
+              </span>
+              <select>
+               <option>
+                All Stores
+               </option>
+               <option>
+                Home &amp; Garden
+               </option>
+               <option>
+                Electronics &amp; Computers
+               </option>
+               <option>
+                Books, Movies, CDs, Games
+               </option>
+               <option>
+                Jewelry, Watches &amp; Gifts
+               </option>
+               <option>
+                Sports, Travel &amp; Toys
+               </option>
+               <option>
+                Worldstock
+               </option>
+               <option>
+                Apparel, Shoes &amp; Access.
+               </option>
+              </select>
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+  <table>
+   <tbody>
+    <tr>
+     <td>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <table>
+           <tbody>
+            <tr>
+             <td>
+              <span>
+               <b>
+                #text
+               </b>
+              </span>
+             </td>
+            </tr>
+            (
+            <tr>
+             <td>
+              <a>
+               #text
+              </a>
+             </td>
+            </tr>
+            ) +
+           </tbody>
+          </table>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <span>
+       <b>
+        Stores
+       </b>
+      </span>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <a>
+           Apparel, Shoes &amp; Access.
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Books, Movies, CDs, Games
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Electronics &amp; Computers
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Home &amp; Garden
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           <b>
+            Jewelry, Watches &amp; Gifts
+           </b>
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Sports, Travel &amp; Toys
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Worldstock
+          </a>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <span>
+       <b>
+        New Stock
+       </b>
+      </span>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <a>
+           Ralph Lauren $29.95
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Ben Sherman 53% off
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Pre-order Harry Potter DVD
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           HP 2GHz System $499
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           New Items within 7 Days
+          </a>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <span>
+       <b>
+        Customer Service
+       </b>
+      </span>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <a>
+           Shopping Cart &amp; Checkout
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Track Your Order
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Your Account
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Help &amp; FAQ
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Best Price Guarantee
+          </a>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <span>
+       <b>
+        About Us
+       </b>
+      </span>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <a>
+           About Us
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Privacy &amp; Security
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Terms &amp; Conditions
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Become An Affiliate
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Business Purchases
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Have Products to Sell?
+          </a>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <a>
+           Investor Relations
+          </a>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </td>
+     <td>
+      <b>
+       &gt;&gt;&gt; View All
+       <a>
+        Jewelry, Watches &amp; Gifts
+       </a>
+       <a>
+        Jewelry
+       </a>
+       <a>
+        #text
+       </a>
+      </b>
+      <table>
+       <tbody>
+        <tr>
+         <td>
+          <table>
+           <tbody>
+            <tr>
+             <td>
+              <table>
+               <tbody>
+                <tr>
+                 <td>
+                  <span>
+                   <b>
+                    List Sorted By:
+                   </b>
+                  </span>
+                 </td>
+                 <td>
+                  |||||
+                  <b>
+                   Top Sellers
+                  </b>
+                  <a>
+                   Discount
+                  </a>
+                  <a>
+                   Newest First
+                  </a>
+                  <a>
+                   Price
+                  </a>
+                  <a>
+                   Quantity
+                  </a>
+                  <a>
+                   Markdowns
+                  </a>
+                 </td>
+                </tr>
+               </tbody>
+              </table>
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <table>
+           <tbody>
+            <tr>
+             <td>
+              <table>
+               <tbody>
+                (
+                <tr>
+                 <td>
+                  <table>
+                   <tbody>
+                    <tr>
+                     <td>
+                      <a>
+                       More Info...
+                      </a>
+                     </td>
+                    </tr>
+                   </tbody>
+                  </table>
+                 </td>
+                 <td>
+                  <a>
+                   <b>
+                    #text
+                   </b>
+                  </a>
+                  <table>
+                   <tbody>
+                    <tr>
+                     <td>
+                      <table>
+                       <tbody>
+                        <tr>
+                         <td>
+                          <b>
+                           List Price:
+                          </b>
+                         </td>
+                         <td>
+                          <s>
+                           #text
+                          </s>
+                         </td>
+                        </tr>
+                        <tr>
+                         <td>
+                          <b>
+                           Price:
+                          </b>
+                         </td>
+                         <td>
+                          <span>
+                           <b>
+                            #text
+                           </b>
+                          </span>
+                         </td>
+                        </tr>
+                        <tr>
+                         <td>
+                          <b>
+                           You Save:
+                          </b>
+                         </td>
+                         <td>
+                          <span>
+                           #text
+                          </span>
+                         </td>
+                        </tr>
+                       </tbody>
+                      </table>
+                     </td>
+                     <td>
+                      <span>
+                       #text
+                       <a>
+                        <span>
+                         <b>
+                          Click here to purchase.
+                         </b>
+                        </span>
+                       </a>
+                      </span>
+                     </td>
+                    </tr>
+                   </tbody>
+                  </table>
+                 </td>
+                </tr>
+                ) +
+               </tbody>
+              </table>
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <table>
+           <tbody>
+            <tr>
+             <td>
+              <table>
+               <tbody>
+                <tr>
+                 <td>
+                  <span>
+                   <b>
+                    List Sorted By:
+                   </b>
+                  </span>
+                 </td>
+                 <td>
+                  |||||
+                  <b>
+                   Top Sellers
+                  </b>
+                  <a>
+                   Discount
+                  </a>
+                  <a>
+                   Newest First
+                  </a>
+                  <a>
+                   Price
+                  </a>
+                  <a>
+                   Quantity
+                  </a>
+                  <a>
+                   Markdowns
+                  </a>
+                 </td>
+                </tr>
+               </tbody>
+              </table>
+             </td>
+            </tr>
+           </tbody>
+          </table>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </td>
+    </tr>
+    <tr>
+     <td>
+      Â© 2003Overstock.com
+     </td>
+     <td>
+      <span>
+       * $2.95 flat rate shipping to the lower 48 states only.  Some items excluded due to size and/or weight.
+      </span>
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </body>
+</html>
