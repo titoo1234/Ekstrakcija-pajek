@@ -1,42 +1,8 @@
-<html>
- <body>
-  <section>
-   MenuMoviesRelease CalendarTop 250 MoviesMost Popular MoviesBrowse Movies by GenreTop Box OfficeShowtimes &amp; TicketsMovie NewsIndia Movie SpotlightTV ShowsWhat's on TV &amp; StreamingTop 250 TV ShowsMost Popular TV ShowsBrowse TV Shows by GenreTV NewsIndia TV SpotlightWatchWhat to WatchLatest TrailersIMDb OriginalsIMDb PicksIMDb PodcastsAwards &amp; EventsOscarsSXSWStar Wars CelebrationCannesSTARmeter AwardsAwards CentralFestival CentralAll EventsCelebsBorn TodayMost Popular CelebsMost Popular CelebsCelebrity NewsCommunityHelp CenterContributor ZonePollsFor Industry ProfessionalsAllAllTitlesTV EpisodesCelebsCompaniesKeywordsAdvanced SearchWatchlistSign InENFully supportedEnglish (United States)Partially supportedFranÃƒÂ§ais (Canada)FranÃƒÂ§ais (France)Deutsch (Deutschland)Ã Â¤Â¹Ã Â¤Â¿Ã Â¤â€šÃ Â¤Â¦Ã Â¥â‚¬ (Ã Â¤Â­Ã Â¤Â¾Ã Â¤Â°Ã Â¤Â¤)Italiano (Italia)PortuguÃƒÂªs (Brasil)EspaÃƒÂ±ol (EspaÃƒÂ±a)EspaÃƒÂ±ol (MÃƒÂ©xico)
-  </section>
-  <div>
-   <div>
-    <div>
-    </div>
-    <div>
-     <div>
-      <div>
-       <div>
-        <h1>
-         #text
-        </h1>
-        <div>
-         <div>
-          View Mode: Compact | Detailed
-         </div>
-         <div>
-          <span>
-           #text
-          </span>
-          <span>
-           |
-          </span>
-          <a>
-           Next Â»
-          </a>
-         </div>
-        </div>
-        <div>
-         Sort by: Popularity | A-Z | User Ratingâ–¼ | Number of Votes | US Box Office | Runtime | Year | Release Date | Date of Your Rating | Your Rating
-        </div>
-        <div>
-         <div>
-          (
-          <div>
+from extraction_automatic import *
+from textdistance import jaccard
+from textdistance import damerau_levenshtein
+
+text1 = """<div>
            <div>
             <h3>
              <span>
@@ -140,9 +106,8 @@
              </span>
             </p>
            </div>
-          </div>
-          ) +
-          <div>
+          </div>"""
+text2 = """<div>
            <div>
             <h3>
              <span>
@@ -202,30 +167,19 @@
              #text
             </p>
             <p>
-             #text
+             Director:Stars:,,,(
              <a>
               #text
              </a>
-             (
-             <a ...="">
-             </a>
-             )?
+             ) +
              <span>
               |
              </span>
              (
-             <a ...="">
+             <a>
+              #text
              </a>
-             )?(
-             <a ...="">
-             </a>
-             )?(
-             <a ...="">
-             </a>
-             )?(
-             <a ...="">
-             </a>
-             )?
+             ) +
             </p>
             <p>
              <span>
@@ -236,35 +190,7 @@
              </span>
             </p>
            </div>
-          </div>
-         </div>
-        </div>
-        <div>
-         <span>
-          #text
-         </span>
-         <span>
-          |
-         </span>
-         <a>
-          Next Â»
-         </a>
-        </div>
-       </div>
-      </div>
-      <div>
-      </div>
-     </div>
-    </div>
-    <div>
-     Clear your history Recently Viewed
-    </div>
-   </div>
-  </div>
-  <section>
-   Get the IMDb AppSign in for more accessSign in for more accessGet the IMDb AppHelpSite IndexIMDbProBox Office MojoIMDb DeveloperPress RoomAdvertisingJobsConditions of UsePrivacy PolicyYour Ads Privacy ChoicesIMDb, an Amazon companyÃ‚Â© 1990-2023 by IMDb.com, Inc.
-  </section>
-  <div>
-  </div>
- </body>
-</html>
+          </div>"""
+
+print(max(len(text1), len(text2)))
+print(jaccard.distance(text1, text2))

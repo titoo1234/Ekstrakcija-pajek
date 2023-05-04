@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup, Comment
 import os
 from textdistance import levenshtein
 import re
+from textdistance import jaccard
 
 def zazeni_roadrunner(html_1, html_2):
     """
@@ -11,11 +12,13 @@ def zazeni_roadrunner(html_1, html_2):
     """
     regex = "" # sproti bomo sestavljali regularni izraz
     # Najprej naredimo DOM drevesi za oba podana html-ja
-    soup_1 = BeautifulSoup(html_1, "html.parser")
+    soup_1 = BeautifulSoup(html_1, "html.parser", from_encoding="utf-8")
     soup_html_1 = soup_1.find("html")
-    soup_2 = BeautifulSoup(html_2, "html.parser")
+    soup_2 = BeautifulSoup(html_2, "html.parser", from_encoding="utf-8")
     soup_html_2 = soup_2.find("html")
     regex = roadrunner(soup_html_1, soup_html_2, regex)
+    regex.strip()
+    regex = re.sub(r"\s+"," ", regex)
     return regex
 
 def roadrunner(soup_1, soup_2, regex):
@@ -30,8 +33,16 @@ def roadrunner(soup_1, soup_2, regex):
         soup_2_text = uredi_text(soup_2)
         if not prazno(soup_1) and not prazno(soup_2):
             local_regex += "<" + str(soup_1.name) + ">" # regex-u dodamo ime značke (začetek)
-            print(local_regex)
-            if levenshtein.distance(soup_1_text,soup_2_text) < 1: # če sta ista samo prepišemo text iz prvega html-ja
+            if soup_1.text == soup_2.text:
+                if re.match(r"[1-9]*\.", soup_1_text.strip()):
+                    local_regex += "#text"
+                else:
+                    local_regex += soup_1.text
+                    local_regex += "</" + str(soup_1.name) + ">"
+                    regex += local_regex
+                    return regex
+            
+            elif levenshtein.distance(soup_1_text,soup_2_text) < 1: # če sta ista samo prepišemo text iz prvega html-ja
                 # če imamo števlike 1., 2., 3., ... smatramo to kot različen tekst zaradi imdb-ja
                 if re.match(r"[1-9]*\.", soup_1_text.strip()):
                     local_regex += "#text"
@@ -59,11 +70,12 @@ def roadrunner(soup_1, soup_2, regex):
                                 # preverimo ali imamo ze tak izraz v nasem regex izrazu
                                 if child_regex:
                                     # Če naletimo na enak izraz, ki se do zdaj se ni ponavljal, ga opremimo s "(...) +" 
-                                    if levenshtein.distance(prejsni_child_regex, child_regex) < 1 and not ponavljanje:
-                                        local_regex = local_regex.replace(child_regex, f"({child_regex}) +")
+                                    if jaccard.distance(prejsni_child_regex, child_regex) < 0.25 and not ponavljanje:
+                                        local_regex = local_regex.replace(prejsni_child_regex, f"({max(child_regex, prejsni_child_regex, key=len)}) +")
+                                        print(local_regex)
                                         ponavljanje = True
                                     # če se enak izraz ze dlje casa ponavlja, ne naredimo nicesar
-                                    elif levenshtein.distance(prejsni_child_regex, child_regex) < 1 and ponavljanje:
+                                    elif jaccard.distance(prejsni_child_regex, child_regex) < 0.25 and ponavljanje:
                                         pass
                                     # če pa je izraz drugačen od prejšnega ga dodamo v local_regex
                                     else:
@@ -74,21 +86,22 @@ def roadrunner(soup_1, soup_2, regex):
                                 break
                             else:
                                 # pogledati moramo, ali se slučajno ujema s katerim od naslednjih child-ov
+                                ponavljanje = False
                                 while children_2:
                                     child = children_2[0]
                                     if ok_tag(child.name):
                                         if se_ujemata(child_1, child):
                                             # našli smo ujemanje 
-                                            print(f"se ne ujemata: {child.name}")
                                             child_regex = roadrunner(child_1, child, regex)
                                             # preverimo ali imamo ze tak izraz v nasem regex izrazu
                                             if child_regex:
                                                 # Če naletimo na enak izraz, ki se do zdaj se ni ponavljal, ga opremimo s "(...) +" 
-                                                if levenshtein.distance(prejsni_child_regex, child_regex) < 1 and not ponavljanje:
-                                                    local_regex = local_regex.replace(child_regex, f"({child_regex}) +")
+                                                if jaccard.distance(prejsni_child_regex, child_regex) < 0.25 and not ponavljanje:
+                                                    local_regex = local_regex.replace(prejsni_child_regex, f"({max(child_regex, prejsni_child_regex, key=len)}) +")
+                                                    print(local_regex)
                                                     ponavljanje = True
                                                 # če se enak izraz ze dlje casa ponavlja, ne naredimo nicesar
-                                                elif levenshtein.distance(prejsni_child_regex, child_regex) < 1 and ponavljanje:
+                                                elif jaccard.distance(prejsni_child_regex, child_regex) < 0.25 and ponavljanje:
                                                     pass
                                                 # če pa je izraz drugačen od prejšnega ga dodamo v local_regex
                                                 else:
