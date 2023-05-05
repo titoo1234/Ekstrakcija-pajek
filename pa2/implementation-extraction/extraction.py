@@ -4,15 +4,8 @@ import extraction_xpath
 def extraction(metoda):
 
     if metoda  == 'A':
-        # extraction_regular_exp
-        extraction_regular_exp.rtv()
-        extraction_regular_exp.rtv()
-
-        pass
+        extraction_regular_exp.zazeni()
     if metoda  == 'B':
-        pass
-
+        extraction_xpath.zazeni()
     if metoda  == 'C':
-        pass
-
-    print(metoda)
+        extraction_automatic.zazeni()

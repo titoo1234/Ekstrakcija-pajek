@@ -1,6 +1,7 @@
 from parsel import Selector
 import re
 import json
+import codecs
 
 def odpri_datoteko(datoteka):
     try:
@@ -27,6 +28,7 @@ def rtv_slo(htmls):
      - PublishedTime
     ter vrne slovar kjer so zgoraj nasteta poglavja kljuci slovarja
     """
+    htmls = [htmls]
     slovar = {}
     xpaths_slovar = {'Title': '//*[@id="main-container"]/div[3]/div/header/h1/text()',
                      'SubTitle': '//*[@id="main-container"]/div[3]/div/header/div[2]/text()',
@@ -75,6 +77,7 @@ def overstock(htmls):
      - Content
     ter vrne slovar kjer so zgoraj nasteta poglavja kljuci slovarja
     """
+    htmls = [htmls]
     slovar = {}
     xpaths_slovar = {'Title':  '/html/body/table[2]/tbody/tr[1]/td[5]/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr/td[2]/a/b/text()',
                      'ListPrice': '/html/body/table[2]/tbody/tr[1]/td[5]/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr/td[2]/table/tbody/tr/td[1]/table/tbody/tr[1]/td[2]/s/text()',
@@ -140,6 +143,7 @@ def imdb(htmls):
      - Content
     ter vrne slovar kjer so zgoraj nasteta poglavja kljuci slovarja
     """
+    htmls = [htmls]
     slovar = {}
     xpaths_slovar = {'Title': '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/a/text()',
                      'Year': '//*[@id="main"]/div/div[3]/div/div/div[3]/h3/span[2]/text()',
@@ -210,3 +214,46 @@ def pocisti_content_imdb(niz):
     niz = re.sub(r"<a(.*?)>", "", niz)
     niz = re.sub(r"</a>", "", niz)
     return niz
+
+
+def zazeni():
+    path1_overstock = r'../input-extraction/WebPages/overstock.com/jewelry01.html'
+    path2_overstock = r'../input-extraction/WebPages/overstock.com/jewelry02.html'
+    path_imdb1 = r'../input-extraction/WebPages/imdb.com/imdb1.html'
+    path_imdb2 = r'../input-extraction/WebPages/imdb.com/imdb2.html'
+    path_rtvslo1 = r'../input-extraction/WebPages/rtvslo.si/Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    path_rtvslo2 = r'../input-extraction/WebPages/rtvslo.si/Volvo XC 40 D4 AWD momentum_ suvereno med najboljs╠îe v razredu - RTVSLO.si.html'
+    
+    print("XPATAHS:")
+    print("==================================================================")
+    print("Overstock.com")
+    print("-------------------------------------------")
+    pageContent = codecs.open(path1_overstock, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(overstock(pageContent), indent = 4,ensure_ascii=False) 
+    print(json_object)
+    print("-------------------------------------------")
+    pageContent = codecs.open(path2_overstock, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(overstock(pageContent), indent = 4,ensure_ascii=False) 
+    print(json_object)
+    print("\n\n")
+
+    print("Rtvslo.si")
+    print("-------------------------------------------")
+    pageContent = codecs.open(path_rtvslo1, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(rtv_slo(pageContent), indent = 4,ensure_ascii=False) 
+    print(json_object)
+    pageContent = codecs.open(path_rtvslo2, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(rtv_slo(pageContent), indent = 4,ensure_ascii=False) 
+    print("-------------------------------------------")
+    print(json_object)
+    print("\n\n")
+
+    print("Imdb.si")
+    print("-------------------------------------------")
+    pageContent = codecs.open(path_imdb1, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(imdb(pageContent), indent = 4,ensure_ascii=False) 
+    print(json_object)
+    pageContent = codecs.open(path_imdb2, 'r', encoding='utf-8', errors='ignore').read()
+    json_object = json.dumps(imdb(pageContent), indent = 4,ensure_ascii=False) 
+    print("-------------------------------------------")
+    print(json_object)

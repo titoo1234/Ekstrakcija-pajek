@@ -4,6 +4,40 @@ from textdistance import levenshtein
 import re
 from textdistance import jaccard
 
+def zazeni():
+    path1_overstock = r'../input-extraction/WebPages/overstock.com/jewelry01.html'
+    path2_overstock = r'../input-extraction/WebPages/overstock.com/jewelry02.html'
+    path_imdb1 = r'../input-extraction/WebPages/imdb.com/imdb1.html'
+    path_imdb2 = r'../input-extraction/WebPages/imdb.com/imdb2.html'
+    path_rtvslo1 = r'../input-extraction/WebPages/rtvslo.si/Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    path_rtvslo2 = r'../input-extraction/WebPages/rtvslo.si/Volvo XC 40 D4 AWD momentum_ suvereno med najboljs╠îe v razredu - RTVSLO.si.html'
+
+    print("ROADRUNNER:")
+    print("==================================================================")
+    print("Overstock.com")
+    print("-------------------------------------------")
+    with open(path1_overstock, encoding="windows-1252", errors="ignore") as file:
+        html_1 = file.read()
+    with open(path2_overstock, encoding="windows-1252", errors="ignore") as file:
+        html_2 = file.read()
+    print(zazeni_roadrunner(html_1, html_2))
+    print("\n\n")
+    print("Rtvslo.si")
+    print("-------------------------------------------")
+    with open(path_imdb1, encoding="windows-1252", errors="ignore") as file:
+        html_1 = file.read()
+    with open(path_imdb2, encoding="windows-1252", errors="ignore") as file:
+        html_2 = file.read()
+    print(zazeni_roadrunner(html_1, html_2))
+    print("\n\n")
+    print("Imdb.si")
+    print("-------------------------------------------")
+    with open(path_rtvslo1, encoding="windows-1252", errors="ignore") as file:
+        html_1 = file.read()
+    with open(path_rtvslo2, encoding="windows-1252", errors="ignore") as file:
+        html_2 = file.read()
+    print(zazeni_roadrunner(html_1, html_2))
+
 def zazeni_roadrunner(html_1, html_2):
     """
     Funkcija naredi dom strukturo (drevesi) za oba podana html-ja
@@ -19,6 +53,7 @@ def zazeni_roadrunner(html_1, html_2):
     regex = roadrunner(soup_html_1, soup_html_2, regex)
     regex.strip()
     regex = re.sub(r"\s+"," ", regex)
+    regex = re.sub(r"\n","", regex)
     return regex
 
 def roadrunner(soup_1, soup_2, regex):
@@ -192,6 +227,3 @@ def prazno(soup):
     if tab == []:
         return True
     return False
-
-def ustreza_heuristikam(child):
-    return True
