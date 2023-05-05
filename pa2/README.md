@@ -8,6 +8,7 @@ Implementacija treh pristopov za ekstrakcijo podatkov s spleta:
 Najprej je potrebno namestiti knjižnici:
 - parsel
 - textdistance
+
 Potem zaženemo aplikacijo z naslednjimi ukazi: 
 - <code> python run-extraction.py A</code> (regularni izrazi)
 - <code> python run-extraction.py B</code> (xpath)
