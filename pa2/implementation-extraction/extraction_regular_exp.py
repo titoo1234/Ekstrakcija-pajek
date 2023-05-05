@@ -38,21 +38,18 @@ def rtv_slo(html):
     # print(lead)
 
 
-    content_pattern = r'<article(?:\s*<p>(.*?)<\/p>\s*)+<\/article>(?=[^<]*(?:<|$))'
-    # content_pattern = r"(?:(?<=^)|(?<=\W))<article(.*?)(<p.*?>(.+?)<\/p.*?>)+?(.*?)(?=<\/article>)(?:(?=\W)|(?=$))"
-    #contents = re.finditer(content_pattern, html)
-    contents = re.findall(content_pattern, html)
-    print(contents)
-    all_content = ''    
-    i = 0
-    for content in contents:
-        i+=1
-        all_content += content.group(1)
-        print(content.group(1))
-    print(i)
-    all_content = '' 
-    slovar['content'] = all_content
-
+    content_pattern = r'<article class="article">[\s\S]+?<p[^>]*([\s\S]*)<\/p>[\s\S]*<\/article>'
+    match = re.compile(content_pattern).search(html)
+    content = match.group(1)
+    content = re.sub('<br>', '', content)
+    content = re.sub('<p>', '', content)
+    content = re.sub('</p>', '', content)
+    content = re.sub(r'\n', '', content)
+    content = re.sub(r'\t', '', content)
+    content = re.sub(r'</strong>', '', content)
+    content = re.sub(r'<strong>', '', content)
+    content = re.sub(r'<p class=\"Body\">', '', content)    
+    slovar['content'] = content
     return slovar
 def overstock(html):
     '''
@@ -105,6 +102,7 @@ def imdb(html):
     runtime = r'[\s\S]+?<span class="runtime">(.+)</span>'
     genre = r'[\s\S]+?<span class="genre">[^A-Z]*(.+?)\s{2}'
     rating = r'[\s\S]+?<div class="inline-block ratings-imdb-rating" name="ir" data-value="([^>]*?)">'
+    
     content = r'[\s\S]+?<p class="text-muted">[^A-Z]*?\s*([\s\S]*?)</p>'
     slovar =dict()
     counter = 1
@@ -139,26 +137,30 @@ if __name__ == '__main__':
     path1 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry01.html'
     path2 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry02.html'
     htmls = [path1,path2]
-    path =        r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\rtvslo.si\Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    pathrtv1 =        r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\rtvslo.si\Audi A6 50 TDI quattro_ nemir v premijskem razredu - RTVSLO.si.html'
+    pathrtv2 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\rtvslo.si\Volvo XC 40 D4 AWD momentum_ suvereno med najboljs╠îe v razredu - RTVSLO.si.html'
     path_imdb1 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\imdb.com\imdb1.html'
     path_imdb2 = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\imdb.com\imdb2.html'
     
-    # path = r'C:\Users\Uporabnik\Desktop\IŠRM 1\Ekstrakcija\Ekstrakcija-pajek\pa2\input-extraction\WebPages\overstock.com\jewelry01.html'
-    # with open(path, 'r',encoding='utf-8') as file:
-    #     pageContent = file.read()
-    # rtv_slo(pageContent)
 
-    pageContent = codecs.open(path_imdb1, 'r', encoding='utf-8', errors='ignore').read()
-    json_object = json.dumps(imdb(pageContent), indent = 4,ensure_ascii=False) 
-    # rtv_slo(pageContent)
-    print(json_object)
 
 
 # RTV TEST=======================
-
-    # pageContent = codecs.open(path, 'r', encoding='utf-8', errors='ignore').read()
-    # json_object = json.dumps(rtv_slo(pageContent), indent = 4) 
-    # # rtv_slo(pageContent)
+    # pageContent = codecs.open(pathrtv1, 'r', encoding='utf-8', errors='ignore').read()
+    # json_object = json.dumps(rtv_slo(pageContent), indent = 4,ensure_ascii=False) 
     # print(json_object)
 
+    # pageContent = codecs.open(pathrtv2, 'r', encoding='utf-8', errors='ignore').read()
+    # json_object = json.dumps(rtv_slo(pageContent), indent = 4,ensure_ascii=False) 
+    # print(json_object)
+
+# IMDB TEST=======================
+    # pageContent = codecs.open(path_imdb1, 'r', encoding='utf-8', errors='ignore').read()
+    # json_object = json.dumps(imdb(pageContent), indent = 4,ensure_ascii=False) 
+    # print(json_object)
+
+# overstock TEST=======================
+    # pageContent = codecs.open(path1, 'r', encoding='utf-8', errors='ignore').read()
+    # json_object = json.dumps(overstock(pageContent), indent = 4,ensure_ascii=False) 
+    # print(json_object)
 
