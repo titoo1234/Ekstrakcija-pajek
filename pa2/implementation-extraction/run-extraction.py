@@ -9,8 +9,6 @@ if __name__ == '__main__':
         if METODA not in 'ABC':
             METODA = 'A'
     except Exception as e:
-        print(e)
         METODA = 'A'
-
     extraction(METODA)
  
