@@ -13,5 +13,4 @@ if __name__ == '__main__':
         METODA = 'A'
 
     extraction(METODA)
-    # zazeni_pajka(METODA)
  
