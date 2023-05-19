@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
-import nltk
+# import nltk
 from nltk.corpus import stopwords
-nltk.download('stopwords-sl')
-stop_words_slovene = set(stopwords.words("slovenian")).union(set(
+# nltk.download('stopwords-sl')
+stop_words_slovene = set(stopwords.words("slovene")).union(set(
         ["ter","nov","novo", "nova","zato","še", "zaradi", "a", "ali", "april", "avgust", "b", "bi", "bil", "bila", "bile", "bili", "bilo", "biti",
          "blizu", "bo", "bodo", "bojo", "bolj", "bom", "bomo", "boste", "bova", "boš", "brez", "c", "cel", "cela",
          "celi", "celo", "d", "da", "daleč", "dan", "danes", "datum", "december", "deset", "deseta", "deseti", "deseto",
@@ -40,4 +40,6 @@ stop_words_slovene = set(stopwords.words("slovenian")).union(set(
          "četrtek", "četrti", "četrto", "čez", "čigav", "š", "šest", "šesta", "šesti", "šesto", "štiri", "ž", "že",
          "svoj", "jesti", "imeti","\u0161e", "iti", "kak", "www", "km", "eur", "pač", "del", "kljub", "šele", "prek",
          "preko", "znova", "morda","kateri","katero","katera", "ampak", "lahek", "lahka", "lahko", "morati", "torej"]))
+
+stop_words_slovene = stop_words_slovene.union(set(["--", "....", "«", '©', '...']))
 
