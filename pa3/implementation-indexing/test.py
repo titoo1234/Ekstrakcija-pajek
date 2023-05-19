@@ -7,7 +7,7 @@ from dokument import Dokument
 
 # from nltk.corpus import stopwords
 import string
-# os.chdir(r'pa3/implementation-indexing')
+os.chdir(r'pa3/implementation-indexing')
 directory = r'PA3-data'
 mape = os.listdir(directory)
 try:
@@ -27,6 +27,7 @@ for mapa in mape:
         pot = dir + '/' +dokument
         dokument = Dokument(dokument, pot)
         print(dokument.tokens)
+        dokument.obdelaj_dokument()
         break
     break
 

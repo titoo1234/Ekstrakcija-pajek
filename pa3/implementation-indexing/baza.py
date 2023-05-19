@@ -1,5 +1,5 @@
 import sqlite3
-from beseda import Beseda
+# from beseda import Beseda
 class Baza():
     def __init__(self):
         self.conn = sqlite3.connect('inverted-index.db')
