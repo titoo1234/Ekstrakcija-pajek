@@ -8,18 +8,27 @@ class Beseda():
         self.dokument = dokument
         self.frekvenca = 0
         self.indeks = ""
+        self.baza = Baza()
 
     def dodaj_v_bazo(self):
-        if not Baza.preveri_besedo(self):
-            Baza.dodaj_besedo_v_index_word(self)
-        Baza.dodaj_besedo_v_bazo(self)
+        if not self.baza.preveri_besedo(self):
+            self.baza.dodaj_besedo_v_index_word(self)
+        self.baza.dodaj_besedo_v_bazo(self)
 
     def nastavi_indeks(self):
-        tab = list(re.finditer(self.dokument.tekst,self.beseda))
-        return tab
-    
-    def nastavi_frekvenco(self):
-        return len(self.indeks)
+        # pattern = re.compile(re.escape(self.beseda))  
+        # TODO tukaj bomo morali iskati iz prejšnje tabele tokensov-tam ko so vezaji itd zraven!!!
+        # matches = pattern.finditer(self.dokument.tekst)
+        # occurrences = [match.span() for match in matches]
+        # tab = list(re.finditer(self.dokument.tekst,self.beseda))
+        indexes = []
+        for index, item in enumerate(self.dokument.tokens_celoten):
+            if item == self.beseda:
+                indexes.append(index)
+        indexes = [str(i) for i in indexes]
+        self.frekvenca = len(indexes)
+        self.indeks = ','.join(indexes)
+
     
 
         

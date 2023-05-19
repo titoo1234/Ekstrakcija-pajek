@@ -9,8 +9,10 @@ class Dokument:
     def __init__(self, ime, pot):
         self.ime = ime
         self.pot =  pot
+        self.baza = Baza()
         self.tekst = self.vrni_tekst(self.pot)
-        self.tokens = self.vrni_tokense(self.tekst)
+        self.tokens,self.tokens_celoten = self.vrni_tokense(self.tekst)
+        
 
     @staticmethod
     def odpri_dokument(pot):
@@ -27,16 +29,16 @@ class Dokument:
         tokens = word_tokenize(tekst,language='slovene')
         filtered_tokens = [token for token in tokens if token.lower() not in stop_words_slovene]
         filtered_tokens = set([token for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 
-        return list(filtered_tokens)
+        return list(filtered_tokens),tokens
     
     def obdelaj_dokument(self):
         ''' Funkcija gre čez vse tokense in indeksira besede v originalnem besedilu'''
-        # Baza.dodaj_dokument(self.ime, self.tekst)
+        self.baza.dodaj_dokument(self.ime, self.tekst, ','.join(self.tokens_celoten))
         for token in self.tokens: 
             beseda = Beseda(token,self)
-            print(beseda.nastavi_indeks())
-            # break
-            # beseda.nastavi_indeks()
+            beseda.nastavi_indeks()#tukaj se nastavi tudi frekvenca
+            Beseda.dodaj_v_bazo(beseda)
+
 
         
     # def obdelaj_vse_dokumente(self):
