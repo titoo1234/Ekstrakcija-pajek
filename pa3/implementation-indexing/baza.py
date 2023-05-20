@@ -15,7 +15,7 @@ class Baza():
     def preveri_besedo(self,beseda):
         poizvedba = '''SELECT count(*) from IndexWord where word = ?'''
         cursor = self.conn.cursor()
-        cursor.execute(poizvedba,[beseda.beseda])
+        cursor.execute(poizvedba,(beseda.beseda,))
         rez = cursor.fetchone()[0]
         return  rez == 1
     
@@ -31,5 +31,13 @@ class Baza():
         cursor.execute(poizvedba,(dokument,text,tokens))
         cursor.close()
 
-        
+    def poisci_podatke(self,beseda):
+        '''vrne vse pojavitve 'besede' v vseh dokumentih'''
+        poizvedba = '''SELECT word,Posting.documentName,frequency,indexes,text,tokens_celoten from Posting 
+                        INNER JOIN Document ON (Posting.documentName = Document.documentName) 
+                        where Posting.word = ?'''
+        cursor = self.conn.cursor()
+        cursor.execute(poizvedba,(beseda,))
+        rez = cursor.fetchall()
+        return  rez 
 

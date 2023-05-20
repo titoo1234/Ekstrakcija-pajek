@@ -32,9 +32,9 @@ for mapa in mape:
         if i % 10 == 0:
             print(i)
             print(dokument.ime)
-    #     if i == 10:
-    #         break
-    # break
+        if i == 10:
+            break
+    break
 
 
 

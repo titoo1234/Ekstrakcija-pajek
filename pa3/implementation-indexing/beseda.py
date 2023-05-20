@@ -21,10 +21,14 @@ class Beseda():
         # TO TABELO FILAMO TUDI V BAZO, KER BOMO TAKO LAŽJE POTEM PREBRALI SNIPETE....
 
         # TEGA NE BOMO RABLI VERJETN:
+
+        # pattern = re.compile(r"\b\S*" + re.escape(self.beseda) + r"\b\S*") 
         # matches = pattern.finditer(self.dokument.tekst)
         # occurrences = [match.span() for match in matches]
-        # tab = list(re.finditer(self.dokument.tekst,self.beseda))
-        
+        # self.frekvenca = len(occurrences)
+        # self.indeks = ','.join([str(par[0]) for par in occurrences])
+        # return
+
         indexes = []
         for index, item in enumerate(self.dokument.tokens_celoten):
             if item == self.beseda:

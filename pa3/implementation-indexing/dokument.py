@@ -22,12 +22,13 @@ class Dokument:
     @staticmethod
     def vrni_tekst(pot):
         dat = Dokument.odpri_dokument(pot)
-        return BeautifulSoup(dat, "html.parser").get_text()
+        rez = BeautifulSoup(dat, "html.parser").get_text()
+        return ' '.join(rez.split())
     
     @staticmethod
     def vrni_tokense(tekst):
         tokens = word_tokenize(tekst,language='slovene')
-        tokens_vrni =  [token.lower() for token in tokens]
+        tokens_vrni =  [token.lower() for token in tokens if token not in string.punctuation]
         # TODO??? IZBRIŠEMO PIKO NA PRVEM MESTU ČE JE
         filtered_tokens = [token for token in tokens if token.lower() not in stop_words_slovene]
         filtered_tokens = set([token.lower() for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 

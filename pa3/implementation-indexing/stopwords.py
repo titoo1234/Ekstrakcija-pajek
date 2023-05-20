@@ -41,5 +41,5 @@ stop_words_slovene = set(stopwords.words("slovene")).union(set(
          "svoj", "jesti", "imeti","\u0161e", "iti", "kak", "www", "km", "eur", "pač", "del", "kljub", "šele", "prek",
          "preko", "znova", "morda","kateri","katero","katera", "ampak", "lahek", "lahka", "lahko", "morati", "torej"]))
 
-stop_words_slovene = stop_words_slovene.union(set(["--", "....", "«", '©', '...']))
+stop_words_slovene = stop_words_slovene.union(set(["--", "....", "«", '©', '...','\xa0',',']))
 
