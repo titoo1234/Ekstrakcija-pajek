@@ -22,14 +22,19 @@ for mapa in mape:
         dokumenti.remove('.DS_Store')
     except:
         pass
-
+    i = 0
     for dokument in dokumenti:
         pot = dir + '/' +dokument
         dokument = Dokument(dokument, pot)
-        print(dokument.tokens)
+        # print(dokument.ime)
         dokument.obdelaj_dokument()
-        break
-    break
+        i+=1
+        if i % 10 == 0:
+            print(i)
+            print(dokument.ime)
+    #     if i == 10:
+    #         break
+    # break
 
 
 

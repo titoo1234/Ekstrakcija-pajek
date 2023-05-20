@@ -27,9 +27,11 @@ class Dokument:
     @staticmethod
     def vrni_tokense(tekst):
         tokens = word_tokenize(tekst,language='slovene')
+        tokens_vrni =  [token.lower() for token in tokens]
+        # TODO??? IZBRIŠEMO PIKO NA PRVEM MESTU ČE JE
         filtered_tokens = [token for token in tokens if token.lower() not in stop_words_slovene]
-        filtered_tokens = set([token for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 
-        return list(filtered_tokens),tokens
+        filtered_tokens = set([token.lower() for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 
+        return list(filtered_tokens),tokens_vrni
     
     def obdelaj_dokument(self):
         ''' Funkcija gre čez vse tokense in indeksira besede v originalnem besedilu'''
