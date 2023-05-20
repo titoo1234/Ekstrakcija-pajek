@@ -37,7 +37,7 @@ class Dokument:
         for token in self.tokens: 
             beseda = Beseda(token,self)
             beseda.nastavi_indeks()#tukaj se nastavi tudi frekvenca
-            Beseda.dodaj_v_bazo(beseda)
+            beseda.dodaj_v_bazo()
 
 
         

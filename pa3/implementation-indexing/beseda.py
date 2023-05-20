@@ -17,10 +17,14 @@ class Beseda():
 
     def nastavi_indeks(self):
         # pattern = re.compile(re.escape(self.beseda))  
-        # TODO tukaj bomo morali iskati iz prejšnje tabele tokensov-tam ko so vezaji itd zraven!!!
+        # tukaj bomo morali iskati iz prejšnje tabele tokensov-tam ko so vezaji itd zraven!!! JE NAREJENO
+        # TO TABELO FILAMO TUDI V BAZO, KER BOMO TAKO LAŽJE POTEM PREBRALI SNIPETE....
+
+        # TEGA NE BOMO RABLI VERJETN:
         # matches = pattern.finditer(self.dokument.tekst)
         # occurrences = [match.span() for match in matches]
         # tab = list(re.finditer(self.dokument.tekst,self.beseda))
+        
         indexes = []
         for index, item in enumerate(self.dokument.tokens_celoten):
             if item == self.beseda:
