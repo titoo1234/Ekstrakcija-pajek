@@ -22,7 +22,8 @@ class Dokument:
     @staticmethod
     def vrni_tekst(pot):
         dat = Dokument.odpri_dokument(pot)
-        rez = BeautifulSoup(dat, "html.parser").get_text()
+        rez = BeautifulSoup(dat, "html.parser").find('body')
+        rez = rez.get_text()
         return ' '.join(rez.split())
     
     @staticmethod

@@ -32,7 +32,7 @@ def izpisi_snipet(indeksi,tokens,tekst):
     snipet  = ''
     for index in indeksi: 
         # snipet += '...' + tekst[index-30:index+30] + '...\n'
-        snipet +=  '...'+ ' '.join(tokens[index-2:index+2])+ '...\n'
+        snipet +=  '...'+ ' '.join(tokens[index-2:index+3])+ '...\n'
     print(snipet)
 
 
