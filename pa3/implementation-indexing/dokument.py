@@ -44,5 +44,17 @@ class Dokument:
     # def obdelaj_vse_dokumente(self):
     #     for dokument in dokumenti:
     #         Beseda.obdelaj_dokument(dokument)
+
+    def pridobi_snippet(self):
+        poizvedba = '''SELECT 
+                        document,
+                        '...' || substr(text, instr(text, ?) - 2, 5) as snippet
+                       FROM 
+                        document
+                       WHERE
+                        text LIKE '%' || ? || '%' 
+                    '''  # verjetno ne dela xD
+        #TODO - vrni poizvedbo
+        return [("evem.gov.si/evem.gov.si.666.html", "Sistem SPOT je eden boljši ... dosedanje delovanje SPOT ni zadovoljivo za ... je bila zaključena. Sistem ni deloval dobro ..."),("e-uprava.gov.si/e-uprava.gov.si.42.html", "... ministrstvo je nadgradilo sistem za učinkovitejšo uporabo.")]
         
     
