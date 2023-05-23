@@ -28,11 +28,52 @@ def poisci_podatke(beseda):
     baza = Baza()
     rezultat = baza.poisci_podatke(beseda)
     return rezultat
+def uredi_indekse(tab):
+    '''
+       naredi pare zacetek,konec
+       zdruzi indekse, ce so le ti dovolj skupaj
+    '''
+    pari = []
+    prejsni = -5
+    zac = -5
+    kon = -5
+    zacetek = True
+    n = len(tab)
+    i = 0
+    for indeks in tab:
+        i +=1
+        if zacetek:
+            zac = indeks
+            kon = indeks
+            zacetek = False
+            prejsni = indeks
+            if i == n:
+                pari.append((zac,kon))
+        else:
+            if indeks - prejsni < 3:#sta dovolj skupaj
+                prejsni = indeks
+                kon = indeks
+                if i == n:
+                    pari.append((zac,kon))
+            else:
+                pari.append((zac,kon))
+                zac = indeks
+                kon = indeks
+                prejsni = indeks
+                if i == n:
+                    pari.append((zac,kon))
+                # pari.append(zacetek,konec)
+    return pari
+        
+
 def izpisi_snipet(indeksi,tokens,tekst):
     snipet  = ''
-    for index in indeksi: 
+    indeksi.sort()
+    indeksi = uredi_indekse(indeksi) 
+    print(indeksi)
+    for levi,desni in indeksi: 
         # snipet += '...' + tekst[index-30:index+30] + '...\n'
-        snipet +=  '...'+ ' '.join(tokens[index-2:index+3])+ '...\n'
+        snipet +=  '...'+ ' '.join(tokens[levi-2:desni+3])+ '...\n'
     print(snipet)
 
 
@@ -40,9 +81,12 @@ if __name__ == '__main__':
     os.chdir(r'pa3/implementation-indexing')
     # POT = r"PA3-data/"
     # SLOVAR_POTI = naredi_slovar_poti()
+    tab = [1]
+    # print(uredi_indekse(tab))
+    
     
 
-    vhod = 'sistem'#input("Results for a query: ")
+    vhod = 'sistem ravninski koordinatni gov koda kodami kodo'#input("Results for a query: ")
     print("\n\n")
     zacetek = time()
     # pridobivanje podatkov iz baze...
