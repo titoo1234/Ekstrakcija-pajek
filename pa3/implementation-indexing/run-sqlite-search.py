@@ -7,8 +7,6 @@ from baza import Baza
 import os
 import os.path
 
-
-
 def naredi_slovar_poti():
     ''' Funkcija vsakemu dokumentu pripiše njegovo ustrezno pot'''
     slovar = {}
@@ -28,6 +26,7 @@ def poisci_podatke(beseda):
     baza = Baza()
     rezultat = baza.poisci_podatke(beseda)
     return rezultat
+
 def uredi_indekse(tab):
     '''
        naredi pare zacetek,konec
@@ -65,7 +64,6 @@ def uredi_indekse(tab):
                 # pari.append(zacetek,konec)
     return pari
         
-
 def izpisi_snipet(indeksi,tokens,tekst):
     snipet  = ''
     indeksi.sort()
@@ -83,9 +81,6 @@ if __name__ == '__main__':
     # SLOVAR_POTI = naredi_slovar_poti()
     tab = [1]
     # print(uredi_indekse(tab))
-    
-    
-
     vhod = 'sistem ravninski koordinatni gov koda kodami kodo'#input("Results for a query: ")
     print("\n\n")
     zacetek = time()
@@ -109,12 +104,6 @@ if __name__ == '__main__':
         i+=1
         if i > 3:
             break
-        
-
-         
-         
-    
-
     # frekvence = Beseda.pridobi_frekvence(tab_besed)
     # rezultati = []
     # for frekvenca, dokument_ime in frekvence:
