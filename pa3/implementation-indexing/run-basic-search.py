@@ -68,36 +68,46 @@ def uredi_indekse(tab):
     return pari
         
 def vrni_snipet(indeksi,tokens,tekst):
-    snipet  = ''
+    snipet  = []
     indeksi.sort()
     indeksi = uredi_indekse(indeksi) 
     for levi,desni in indeksi: 
         # snipet += '...' + tekst[index-30:index+30] + '...\n'
-        snipet +=  '...'+ ' '.join(tokens[levi-2:desni+3])+ '...\n'
-    return snipet
+        snipet.append(' '.join(tokens[levi-2:desni+3]))
+    return "... " + " ... ".join(snipet) + " ..."
 
-def poisci_podatke(beseda, dokumenti):
+def poisci_podatke(besede, dokumenti):
     ''' Metoda poišče vse podatke o besedi v vseh dokumentih '''
     slovar = {} # polnili bomo slovar dokumentov oblike {'ime_dokumenta': [frekvenca, snippet]}
+    i = 0
     for dokument in dokumenti:
-        # najprej pogledamo ali je beseda sploh v dokumentu
+        print(i)
+        i +=1
         ime_dokumenta = os.path.basename(dokument)
         tekst = Dokument.vrni_tekst(dokument)
         tokensi = Dokument.vrni_tokense(tekst)[0]
-        print(tokensi)
-        if beseda in tokensi:
-            print("tukaj sem")
-            # če je, pa poiščemo frekvenco in pa snippet
-            frekvenca = tokensi.count(beseda)
-            indeksi = poisci_indekse(tokensi, beseda)
-            snippet = vrni_snipet(indeksi, tokensi, tekst)
+        frekvenca = 0
+        indeksi = []
+        snippet = ""
+        for beseda in besede:
+            # najprej pogledamo ali je beseda sploh v dokumentu
+            if beseda in tokensi:
+                # če je, pa poiščemo frekvenco in pa indekse
+                frekvenca += tokensi.count(beseda)
+                indeksi += poisci_indekse(tokensi, beseda)
+        indeksi = sorted(indeksi)
+        # naredimo snippet
+        snippet = vrni_snipet(indeksi, tokensi, tekst)
+        if frekvenca > 0:
             slovar[ime_dokumenta] = [frekvenca, snippet]
-    print(slovar)
+    slovar = dict(sorted(slovar.items(), key=lambda x: x[1][0]))
     return slovar 
 
 if __name__ == '__main__':
     dokumenti = naredi_tabelo_poti()
-    slovar = poisci_podatke("sistem", dokumenti)
+    # slovar = poisci_podatke(["sistem", "spot"], dokumenti)
+    slovar = poisci_podatke(["sistem", "spot"], ["PA3-data/evem.gov.si/evem.gov.si.66.html"])
+    print(slovar)
 
     # tab = [1]
     # vhod = input("Results for a query: ")
