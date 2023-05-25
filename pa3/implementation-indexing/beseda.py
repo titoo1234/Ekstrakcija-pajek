@@ -30,7 +30,7 @@ class Beseda():
         # return
 
         indexes = []
-        for index, item in enumerate(self.dokument.tokens_celoten):
+        for index, item in enumerate([token.lower() for token in self.dokument.tokens_celoten]):
             if item == self.beseda:
                 indexes.append(index)
         indexes = [str(i) for i in indexes]

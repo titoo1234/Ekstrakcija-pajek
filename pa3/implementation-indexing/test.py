@@ -14,7 +14,7 @@ try:
     mape.remove('__MACOSX')
 except:
     pass
-
+i = 0
 for mapa in mape:
     dir = r'PA3-data/' + mapa
     dokumenti = os.listdir(dir)
@@ -22,7 +22,7 @@ for mapa in mape:
         dokumenti.remove('.DS_Store')
     except:
         pass
-    i = 0
+    
     for dokument in dokumenti:
         pot = dir + '/' +dokument
         dokument = Dokument(dokument, pot)
@@ -32,9 +32,10 @@ for mapa in mape:
         if i % 10 == 0:
             print(i)
             print(dokument.ime)
-        if i == 10:
-            break
-    break
+    #     if i == 10:
+    #         print(i)
+        break
+    
 
 
 
