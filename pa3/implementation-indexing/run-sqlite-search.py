@@ -8,6 +8,7 @@ import os
 import os.path
 import re
 
+<<<<<<< HEAD
 def uredi_besedilo(besedilo):
     # Odstrani presledke med ločili
     uredeno_besedilo = re.sub(r'\s+([.,:;?!])', r'\1', besedilo)
@@ -15,6 +16,8 @@ def uredi_besedilo(besedilo):
     uredeno_besedilo = uredeno_besedilo.strip()
     return uredeno_besedilo
 
+=======
+>>>>>>> 5a45857b61f0fe34ea09ff0fd8c12c654835ca89
 def naredi_slovar_poti():
     ''' Funkcija vsakemu dokumentu pripiše njegovo ustrezno pot'''
     slovar = {}
@@ -34,6 +37,7 @@ def poisci_podatke(beseda):
     baza = Baza()
     rezultat = baza.poisci_podatke(beseda)
     return rezultat
+
 def uredi_indekse(tab):
     '''
        naredi pare zacetek,konec
@@ -71,7 +75,6 @@ def uredi_indekse(tab):
                 # pari.append(zacetek,konec)
     return pari
         
-
 def izpisi_snipet(indeksi,tokens,tekst):
     snipet  = ''
     indeksi.sort()
