@@ -8,7 +8,14 @@ from stopwords import stop_words_slovene
 from time import sleep
 from tqdm import tqdm
 import string
+import re
 
+def uredi_besedilo(besedilo):
+    # Odstrani presledke med ločili
+    uredeno_besedilo = re.sub(r'\s+([.,:;?!])', r'\1', besedilo)
+    # Odstrani presledke na začetku in koncu besedila
+    uredeno_besedilo = uredeno_besedilo.strip()
+    return uredeno_besedilo
 
 def naredi_tabelo_poti():
     ''' Funkcija vsakemu dokumentu pripiše njegovo ustrezno pot'''
@@ -24,15 +31,15 @@ def naredi_tabelo_poti():
 def razbij_poizvedbo_na_besede(niz):
     ''' Metoda razdeli niz na posamezne besede in vrne tabelo besed '''
     besede = word_tokenize(niz, language="slovene")
-    besede = [beseda.lower() for beseda in besede]
+    print(besede)
     return besede
 
 def poisci_indekse(tokensi, beseda):
-        indexes = []
-        for index, item in enumerate(tokensi):
-            if item == beseda:
-                indexes.append(index)
-        return indexes
+    indexes = []
+    for index, item in enumerate(tokensi):
+        if item.lower() == beseda.lower():
+            indexes.append(index)
+    return indexes
 
 def uredi_indekse(tab):
     '''
@@ -77,17 +84,12 @@ def vrni_snipet(indeksi,tokens,tekst):
     indeksi = uredi_indekse(indeksi) 
     for levi,desni in indeksi: 
         # snipet += '...' + tekst[index-30:index+30] + '...\n'
-        snipet.append(' '.join(tokens[levi-2:desni+3]))
+        snipet.append(uredi_besedilo(' '.join(tokens[levi-2:desni+3])))
     return "... " + " ... ".join(snipet) + " ..."
 
 def vrni_tokense(tekst):
-        tokens = word_tokenize(tekst,language='slovene')
-        # tokens_vrni =  [token.lower() for token in tokens if token not in string.punctuation]
-        # TODO??? IZBRIŠEMO PIKO NA PRVEM MESTU ČE JE
-        filtered_tokens = [token.lower() for token in tokens if token.lower() not in stop_words_slovene]
-        return filtered_tokens
-        # filtered_tokens = set([token.lower() for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 
-        # return list(filtered_tokens),tokens_vrni
+    tokens = word_tokenize(tekst,language='slovene')
+    return tokens
 
 def poisci_podatke(besede, dokumenti):
     ''' Metoda poišče vse podatke o besedi v vseh dokumentih '''
@@ -113,7 +115,7 @@ def poisci_podatke(besede, dokumenti):
         snippet = vrni_snipet(indeksi, tokensi, tekst)
         if frekvenca > 0:
             slovar[ime_dokumenta] = [frekvenca, snippet]
-        sleep(0.01)
+        sleep(0.0001)
     return slovar 
 
 if __name__ == '__main__':
@@ -124,7 +126,7 @@ if __name__ == '__main__':
     zacetek = time()
     # # pridobivanje podatkov 
     tab_besed = razbij_poizvedbo_na_besede(vhod)
-    print("\nPreglejujem dokumente...\n")
+    print("\nSearching for words in documents ...\n")
     slovar_dokumentov = poisci_podatke(tab_besed, dokumenti)
     tab_dokumentov = sorted(slovar_dokumentov.items(), key=lambda x: x[1][0], reverse=True)
     # lep izpis
@@ -137,31 +139,3 @@ if __name__ == '__main__':
     # Zapis na datoteko
     with open("testne_dat.txt", "w") as dat:
         print(tabulate(tabela, headers=glava), file=dat)
-
-    #     for vrstica in poisci_podatke(beseda, dokumenti):
-    #         beseda,dokument,frekvenca,indeksi,tekst,tokens_celoten = vrstica #rezultat = (beseda,dokument,frekvenca,indeksi,tekst,tokens)
-    #         if dokument in slovar_dokumenti: 
-    #             slovar_dokumenti[dokument][2].extend([int(i) for i in indeksi.split(',')]) 
-    #         else:
-    #             slovar_dokumenti[dokument] = (tekst,tokens_celoten,[int(i) for i in indeksi.split(',') if indeksi != ''])
-    # # print(slovar_dokumenti)
-    # sorted_dict = dict(sorted(slovar_dokumenti.items(), key=lambda item: len(item[1][2]),reverse=True))
-    # i = 0
-    # for dokument,(tekst,tokens,indeksi) in sorted_dict.items():
-    #     print(dokument)
-    #     print(len(indeksi))
-    #     izpisi_snipet(indeksi,tokens.split(','),tekst)
-    #     i+=1
-    #     if i > 3:
-    #         break
-    # # frekvence = Beseda.pridobi_frekvence(tab_besed)
-    # # rezultati = []
-    # # for frekvenca, dokument_ime in frekvence:
-    # #     dokument = Dokument(dokument_ime, )
-    # # snippeti = Dokument.pridobi_snippet()
-    # # # ...
-    # konec = time()
-    
-    # print(f"\tResults faoud in {konec-zacetek}ms.")
-    # print("\n\n")
-    # table = [["Frequencies", "Document", "Snnippet"]]
