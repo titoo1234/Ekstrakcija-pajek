@@ -139,9 +139,9 @@ if __name__ == '__main__':
         #     dokument = Dokument(dokument_ime, )
         # snippeti = Dokument.pridobi_snippet()
         # # ...
-        konec = time()
+        # konec = time()
         
-        print(f"\tResults faoud in {konec-zacetek}ms.")
+        # print(f"\tResults faoud in {konec-zacetek}ms.")
         # print("\n\n")
         # table = [["Frequencies", "Document", "Snnippet"]]
 

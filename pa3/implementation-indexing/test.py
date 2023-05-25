@@ -34,7 +34,7 @@ for mapa in mape:
             print(dokument.ime)
     #     if i == 10:
     #         print(i)
-        break
+        # break
     
 
 
