@@ -4,6 +4,10 @@ from nltk.tokenize import word_tokenize
 from tabulate import tabulate
 from beseda import Beseda
 from dokument import Dokument
+from stopwords import stop_words_slovene
+from time import sleep
+from tqdm import tqdm
+import string
 
 
 def naredi_tabelo_poti():
@@ -76,16 +80,25 @@ def vrni_snipet(indeksi,tokens,tekst):
         snipet.append(' '.join(tokens[levi-2:desni+3]))
     return "... " + " ... ".join(snipet) + " ..."
 
+def vrni_tokense(tekst):
+        tokens = word_tokenize(tekst,language='slovene')
+        # tokens_vrni =  [token.lower() for token in tokens if token not in string.punctuation]
+        # TODO??? IZBRIŠEMO PIKO NA PRVEM MESTU ČE JE
+        filtered_tokens = [token.lower() for token in tokens if token.lower() not in stop_words_slovene]
+        return filtered_tokens
+        # filtered_tokens = set([token.lower() for token in filtered_tokens if token not in string.punctuation]) # ne potrebujemo duplikatov 
+        # return list(filtered_tokens),tokens_vrni
+
 def poisci_podatke(besede, dokumenti):
     ''' Metoda poišče vse podatke o besedi v vseh dokumentih '''
     slovar = {} # polnili bomo slovar dokumentov oblike {'ime_dokumenta': [frekvenca, snippet]}
     i = 0
-    for dokument in dokumenti:
-        print(i)
+    for i in tqdm(range(len(dokumenti))):
+        dokument = dokumenti[i] 
         i +=1
         ime_dokumenta = os.path.basename(dokument)
         tekst = Dokument.vrni_tekst(dokument)
-        tokensi = Dokument.vrni_tokense(tekst)[0]
+        tokensi = vrni_tokense(tekst)
         frekvenca = 0
         indeksi = []
         snippet = ""
@@ -100,23 +113,31 @@ def poisci_podatke(besede, dokumenti):
         snippet = vrni_snipet(indeksi, tokensi, tekst)
         if frekvenca > 0:
             slovar[ime_dokumenta] = [frekvenca, snippet]
-    slovar = dict(sorted(slovar.items(), key=lambda x: x[1][0]))
+        sleep(0.01)
     return slovar 
 
 if __name__ == '__main__':
     dokumenti = naredi_tabelo_poti()
-    # slovar = poisci_podatke(["sistem", "spot"], dokumenti)
-    slovar = poisci_podatke(["sistem", "spot"], ["PA3-data/evem.gov.si/evem.gov.si.66.html"])
-    print(slovar)
-
-    # tab = [1]
-    # vhod = input("Results for a query: ")
-    # print("\n\n")
-    # zacetek = time()
+    # slovar = poisci_podatke(["sistem", "spot"], ["PA3-data/evem.gov.si/evem.gov.si.66.html"])
+    # print(slovar)
+    vhod = input("\nResults for a query: ")
+    zacetek = time()
     # # pridobivanje podatkov 
-    # tab_besed = razbij_poizvedbo_na_besede(vhod)
-    # slovar_dokumenti = dict()
-    # for beseda in tab_besed:
+    tab_besed = razbij_poizvedbo_na_besede(vhod)
+    print("\nPreglejujem dokumente...\n")
+    slovar_dokumentov = poisci_podatke(tab_besed, dokumenti)
+    tab_dokumentov = sorted(slovar_dokumentov.items(), key=lambda x: x[1][0], reverse=True)
+    # lep izpis
+    glava = ["Frequencies", "Document", "Snippet"]
+    tabela = []
+    for izhod in tab_dokumentov: # vzamemo samo prvih pet elementov
+        tabela.append([izhod[1][0], izhod[0], izhod[1][1]])
+    konec = time() 
+    print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
+    # Zapis na datoteko
+    with open("testne_dat.txt", "w") as dat:
+        print(tabulate(tabela, headers=glava), file=dat)
+
     #     for vrstica in poisci_podatke(beseda, dokumenti):
     #         beseda,dokument,frekvenca,indeksi,tekst,tokens_celoten = vrstica #rezultat = (beseda,dokument,frekvenca,indeksi,tekst,tokens)
     #         if dokument in slovar_dokumenti: 
