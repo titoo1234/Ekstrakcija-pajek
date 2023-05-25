@@ -6,15 +6,15 @@ from dokument import Dokument
 from baza import Baza
 import os
 import os.path
+import re
 
-def naredi_slovar_poti():
-    ''' Funkcija vsakemu dokumentu pripiše njegovo ustrezno pot'''
-    slovar = {}
-    for mapa in os.listdir(POT):
-        pot = os.path.join(POT, mapa)
-        for dokument in os.listdir(pot): # treba je se počistit __MACOS in druge
-            slovar[dokument] = pot
-    return slovar
+def uredi_besedilo(besedilo):
+    # Odstrani presledke med ločili
+    uredeno_besedilo = re.sub(r'\s+([.,:;?!])', r'\1', besedilo)
+    # Odstrani presledke na začetku in koncu besedila
+    uredeno_besedilo = uredeno_besedilo.strip()
+    return uredeno_besedilo
+
 
 def razbij_poizvedbo_na_besede(niz):
     ''' Metoda razdeli niz na posamezne besede in vrne tabelo besed '''
@@ -65,14 +65,17 @@ def uredi_indekse(tab):
     return pari
         
 def izpisi_snipet(indeksi,tokens,tekst):
-    snipet  = ''
+    snipet  = []
     indeksi.sort()
     indeksi = uredi_indekse(indeksi) 
-    print(indeksi)
+    # print(indeksi)
     for levi,desni in indeksi: 
+        
         # snipet += '...' + tekst[index-30:index+30] + '...\n'
-        snipet +=  '...'+ ' '.join(tokens[levi-2:desni+3])+ '...\n'
-    print(snipet)
+        snipet.append(uredi_besedilo(' '.join(tokens[levi-2:desni+3])))
+    return "... " + " ... ".join(snipet) + " ..."
+    #     snipet +=  '...'+ uredi_besedilo(' '.join(tokens[levi-2:desni+3]))+ '...\n'
+    # print(snipet)
 
 
 if __name__ == '__main__':
@@ -81,7 +84,10 @@ if __name__ == '__main__':
     # SLOVAR_POTI = naredi_slovar_poti()
     tab = [1]
     # print(uredi_indekse(tab))
-    vhod = 'sistem ravninski koordinatni gov koda kodami kodo'#input("Results for a query: ")
+    
+
+# while True:
+    vhod = input("Results for a query: ")
     print("\n\n")
     zacetek = time()
     # pridobivanje podatkov iz baze...
@@ -97,23 +103,46 @@ if __name__ == '__main__':
     # print(slovar_dokumenti)
     sorted_dict = dict(sorted(slovar_dokumenti.items(), key=lambda item: len(item[1][2]),reverse=True))
     i = 0
+
+
+    glava = ["Frequencies", "Document", "Snippet"]
+    tabela = []
     for dokument,(tekst,tokens,indeksi) in sorted_dict.items():
-        print(dokument)
-        print(len(indeksi))
-        izpisi_snipet(indeksi,tokens.split(','),tekst)
-        i+=1
-        if i > 3:
-            break
-    # frekvence = Beseda.pridobi_frekvence(tab_besed)
-    # rezultati = []
-    # for frekvenca, dokument_ime in frekvence:
-    #     dokument = Dokument(dokument_ime, )
-    # snippeti = Dokument.pridobi_snippet()
-    # # ...
-    konec = time()
+        tokens = tokens.split(',,,')
+        pravi_tokens = []
+        for tab in tokens:
+            pravi_tokens.extend(tab.split(','))
+            pravi_tokens.append(',')
+        pravi_tokens = pravi_tokens[:-1] 
+        snipet = izpisi_snipet(indeksi,pravi_tokens,tekst)
+        tabela.append([len(indeksi),dokument, snipet])#frekvenca,dokument,snipet
+        # i+=1
+        # if i > 3:
+        #     break
+    konec = time() 
+    print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
+    with open("testne_dat_sql.txt", "w") as dat:
+        print(tabulate(tabela, headers=glava), file=dat)
+
+
+        
+
+         
+
+
+         
     
-    print(f"\tResults faoud in {konec-zacetek}ms.")
-    # print("\n\n")
-    # table = [["Frequencies", "Document", "Snnippet"]]
+
+        # frekvence = Beseda.pridobi_frekvence(tab_besed)
+        # rezultati = []
+        # for frekvenca, dokument_ime in frekvence:
+        #     dokument = Dokument(dokument_ime, )
+        # snippeti = Dokument.pridobi_snippet()
+        # # ...
+        konec = time()
+        
+        print(f"\tResults faoud in {konec-zacetek}ms.")
+        # print("\n\n")
+        # table = [["Frequencies", "Document", "Snnippet"]]
 
 
