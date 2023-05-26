@@ -79,7 +79,7 @@ def izpisi_snipet(indeksi,tokens,tekst):
 
 
 if __name__ == '__main__':
-    os.chdir(r'pa3/implementation-indexing')
+    # os.chdir(r'pa3/implementation-indexing')
     # POT = r"PA3-data/"
     # SLOVAR_POTI = naredi_slovar_poti()
     tab = [1]
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         # if i > 3:
         #     break
     konec = time() 
-    print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
+    print(f"\nResults found in {round(konec-zacetek,2)}s\n\n")
     ime_dat = f"isci_{'_'.join(tab_besed)}_sql"
     with open(ime_dat, "w",encoding='utf-8') as dat:
         print(tabulate(tabela, headers=glava), file=dat)
