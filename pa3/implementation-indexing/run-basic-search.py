@@ -31,7 +31,6 @@ def naredi_tabelo_poti():
 def razbij_poizvedbo_na_besede(niz):
     ''' Metoda razdeli niz na posamezne besede in vrne tabelo besed '''
     besede = word_tokenize(niz, language="slovene")
-    print(besede)
     return besede
 
 def poisci_indekse(tokensi, beseda):
@@ -138,5 +137,6 @@ if __name__ == '__main__':
     konec = time() 
     print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
     # Zapis na datoteko
-    with open("testne_dat.txt", "w",encoding='utf-8') as dat:
+    ime_dat = f"isci_{'_'.join(tab_besed)}_basic.txt"
+    with open(ime_dat, "w",encoding='utf-8') as dat:
         print(tabulate(tabela, headers=glava), file=dat)
