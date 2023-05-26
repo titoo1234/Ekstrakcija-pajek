@@ -104,12 +104,13 @@ def poisci_podatke(besede, dokumenti):
         frekvenca = 0
         indeksi = []
         snippet = ""
+        tokens_lower = [token.lower() for token in tokensi]
         for beseda in besede:
             # najprej pogledamo ali je beseda sploh v dokumentu
-            if beseda in tokensi:
+            if beseda.lower() in tokens_lower:
                 # če je, pa poiščemo frekvenco in pa indekse
-                frekvenca += tokensi.count(beseda)
-                indeksi += poisci_indekse(tokensi, beseda)
+                frekvenca += tokens_lower.count(beseda)
+                indeksi += poisci_indekse(tokens_lower, beseda)
         indeksi = sorted(indeksi)
         # naredimo snippet
         snippet = vrni_snipet(indeksi, tokensi, tekst)
@@ -137,5 +138,5 @@ if __name__ == '__main__':
     konec = time() 
     print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
     # Zapis na datoteko
-    with open("testne_dat.txt", "w") as dat:
+    with open("testne_dat.txt", "w",encoding='utf-8') as dat:
         print(tabulate(tabela, headers=glava), file=dat)

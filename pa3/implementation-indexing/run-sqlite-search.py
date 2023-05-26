@@ -121,7 +121,7 @@ if __name__ == '__main__':
         #     break
     konec = time() 
     print(f"\nResults found in {round(konec-zacetek,0)}s\n\n")
-    with open("testne_dat_sql.txt", "w") as dat:
+    with open("testne_dat_sql.txt", "w",encoding='utf-8') as dat:
         print(tabulate(tabela, headers=glava), file=dat)
 
 
