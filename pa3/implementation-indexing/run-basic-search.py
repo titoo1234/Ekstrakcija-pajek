@@ -104,6 +104,7 @@ def poisci_podatke(besede, dokumenti):
         frekvenca = 0
         indeksi = []
         snippet = ""
+        tokens_lower = [token.lower() for token in tokensi]
         for beseda in besede:
             # najprej pogledamo ali je beseda sploh v dokumentu
             if beseda.lower() in tokens_lower:
